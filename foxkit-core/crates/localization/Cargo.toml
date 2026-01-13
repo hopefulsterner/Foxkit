@@ -1,0 +1,13 @@
+[package]
+name = "foxkit-localization"
+version = "0.1.0"
+edition = "2024"
+description = "Internationalization (i18n) support for Foxkit"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+parking_lot = "0.12"
+fluent-bundle = "0.15"
+unic-langid = "0.9"
