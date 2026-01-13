@@ -1,0 +1,16 @@
+[package]
+name = "code-actions"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Code Actions - quick fixes and refactorings"
+
+[dependencies]
+lsp = { path = "../lsp" }
+diagnostics = { path = "../diagnostics" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

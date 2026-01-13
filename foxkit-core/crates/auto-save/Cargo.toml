@@ -1,0 +1,15 @@
+[package]
+name = "auto-save"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Auto Save - automatic file saving"
+
+[dependencies]
+workspace = { path = "../workspace" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

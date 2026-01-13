@@ -1,0 +1,14 @@
+[package]
+name = "minimap-decorations"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Minimap Decorations - highlights and markers on minimap"
+
+[dependencies]
+minimap = { path = "../minimap" }
+diagnostics = { path = "../diagnostics" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

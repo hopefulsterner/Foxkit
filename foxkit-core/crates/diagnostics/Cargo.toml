@@ -1,0 +1,12 @@
+[package]
+name = "diagnostics"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Diagnostics - problems, errors and warnings management"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+parking_lot.workspace = true
+url = "2.5"

@@ -1,0 +1,16 @@
+[package]
+name = "code-lens"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Code Lens - inline code annotations"
+
+[dependencies]
+lsp = { path = "../lsp" }
+buffer = { path = "../buffer" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

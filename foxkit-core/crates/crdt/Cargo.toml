@@ -1,0 +1,13 @@
+[package]
+name = "crdt"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit CRDT - conflict-free replicated data types for collaboration"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+rope = { path = "../rope" }
+
+serde.workspace = true
+serde_json = "1.0"
+uuid.workspace = true

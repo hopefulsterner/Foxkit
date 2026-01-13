@@ -1,0 +1,24 @@
+[package]
+name = "editor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit editor core - high-performance text editing"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+buffer = { path = "../buffer" }
+rope = { path = "../rope" }
+language = { path = "../language" }
+
+tokio.workspace = true
+async-trait.workspace = true
+parking_lot.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+unicode-segmentation = "1.11"
+unicode-width = "0.1"

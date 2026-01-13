@@ -1,0 +1,11 @@
+[package]
+name = "formatting"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Formatting - code formatting and indentation"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+parking_lot.workspace = true

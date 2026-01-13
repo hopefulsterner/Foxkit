@@ -1,0 +1,17 @@
+[package]
+name = "refactor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Refactor - code refactoring engine"
+
+[dependencies]
+lsp = { path = "../lsp" }
+treesitter = { path = "../treesitter" }
+buffer = { path = "../buffer" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

@@ -1,0 +1,12 @@
+[package]
+name = "file-decorations"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit File Decorations - file/folder badges and colors"
+
+[dependencies]
+parking_lot.workspace = true
+serde.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"

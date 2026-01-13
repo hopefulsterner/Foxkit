@@ -1,0 +1,16 @@
+[package]
+name = "explorer"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Explorer - file explorer sidebar"
+
+[dependencies]
+fs = { path = "../fs" }
+workspace = { path = "../workspace" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

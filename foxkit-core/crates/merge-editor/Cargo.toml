@@ -1,0 +1,15 @@
+[package]
+name = "merge-editor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Merge Editor - 3-way merge conflict resolution"
+
+[dependencies]
+buffer = { path = "../buffer" }
+diff = { path = "../diff" }
+
+parking_lot.workspace = true
+serde.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"

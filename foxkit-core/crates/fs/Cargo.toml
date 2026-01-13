@@ -1,0 +1,19 @@
+[package]
+name = "fs"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit FS - file system abstraction"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+notify = "6.1"
+walkdir = "2.5"
+globset = "0.4"
+ignore = "0.4"

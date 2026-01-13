@@ -1,0 +1,18 @@
+[package]
+name = "ui"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit UI - component framework"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+gpu = { path = "../gpu" }
+theme = { path = "../theme" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+smallvec = "1.13"

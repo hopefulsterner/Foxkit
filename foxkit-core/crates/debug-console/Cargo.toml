@@ -1,0 +1,14 @@
+[package]
+name = "debug-console"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Debug Console - debug REPL and evaluation"
+
+[dependencies]
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"
+chrono = { version = "0.4", features = ["serde"] }

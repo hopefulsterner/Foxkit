@@ -1,0 +1,13 @@
+[package]
+name = "keybindings"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Keybindings - keyboard shortcut management"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+serde_json = "1.0"
+parking_lot.workspace = true
+anyhow = "1.0"

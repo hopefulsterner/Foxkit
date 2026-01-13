@@ -1,0 +1,16 @@
+[package]
+name = "folding-range"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Folding Range - code folding regions"
+
+[dependencies]
+lsp = { path = "../lsp" }
+treesitter = { path = "../treesitter" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

@@ -1,0 +1,14 @@
+[package]
+name = "output-channel"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Output Channel - log output panels"
+
+[dependencies]
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+chrono = "0.4"
+
+anyhow = "1.0"
+tracing = "0.1"

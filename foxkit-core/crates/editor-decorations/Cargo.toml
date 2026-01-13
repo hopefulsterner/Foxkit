@@ -1,0 +1,13 @@
+[package]
+name = "editor-decorations"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Editor Decorations - text decorations and annotations"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

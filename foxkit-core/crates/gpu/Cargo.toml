@@ -1,0 +1,19 @@
+[package]
+name = "gpu"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit GPU - hardware-accelerated rendering"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+raw-window-handle = "0.6"
+wgpu = "0.19"
+bytemuck = { version = "1.14", features = ["derive"] }
+glam = "0.25"

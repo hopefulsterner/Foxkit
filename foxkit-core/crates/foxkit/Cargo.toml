@@ -1,0 +1,38 @@
+[package]
+name = "foxkit"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "foxkit"
+path = "src/main.rs"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+foxkit-gpui = { path = "../foxkit-gpui" }
+foxkit-ui = { path = "../foxkit-ui" }
+
+# Workspace components
+workspace = { path = "../workspace" }
+editor = { path = "../editor" }
+terminal = { path = "../terminal" }
+
+# AI & Collab
+ai-core = { path = "../ai-core" }
+collab = { path = "../collab" }
+
+# Monorepo Intelligence
+monorepo = { path = "../monorepo" }
+
+# Extensions
+extension-host = { path = "../extension-host" }
+
+# Platform
+platform-native = { path = "../platform-native" }
+
+# Utilities
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"

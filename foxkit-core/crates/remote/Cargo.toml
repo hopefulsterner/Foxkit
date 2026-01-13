@@ -1,0 +1,28 @@
+[package]
+name = "remote"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Remote - remote development connections"
+
+[dependencies]
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+thiserror = "2.0"
+
+# SSH
+russh = "0.46"
+russh-keys = "0.46"
+
+# WebSocket
+tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
+futures-util = "0.3"
+
+# HTTP
+reqwest = { version = "0.12", features = ["json", "stream"] }
+
+# Compression
+flate2 = "1.0"

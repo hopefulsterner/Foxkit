@@ -1,0 +1,214 @@
+[workspace]
+resolver = "2"
+members = [
+    # ═══════════════════════════════════════════════════════════════
+    # CORE FOUNDATION
+    # ═══════════════════════════════════════════════════════════════
+    "crates/foxkit",
+    "crates/foxkit-core",
+    "crates/buffer",
+    "crates/rope",
+    "crates/crdt",
+    "crates/history",
+    "crates/fs",
+    "crates/project",
+    "crates/workspace",
+    "crates/workspace-trust",
+    "crates/workspace-edit",
+    "crates/workspace-layout",
+    "crates/workspace-symbols",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # EDITOR CORE
+    # ═══════════════════════════════════════════════════════════════
+    "crates/editor",
+    "crates/selection",
+    "crates/markers",
+    "crates/folding",
+    "crates/folding-range",
+    "crates/minimap",
+    "crates/minimap-decorations",
+    "crates/gutter",
+    "crates/editor-decorations",
+    "crates/editor-tabs",
+    "crates/editor-scroll",
+    "crates/split-view",
+    "crates/multi-cursor",
+    "crates/word-wrap",
+    "crates/indent-guides",
+    "crates/bracket-matching",
+    "crates/sticky-scroll",
+    "crates/font-ligatures",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # LANGUAGE INTELLIGENCE (LSP)
+    # ═══════════════════════════════════════════════════════════════
+    "crates/lsp",
+    "crates/treesitter",
+    "crates/syntax",
+    "crates/completion",
+    "crates/hover",
+    "crates/diagnostics",
+    "crates/goto-definition",
+    "crates/find-references",
+    "crates/references",
+    "crates/document-symbol",
+    "crates/document-highlight",
+    "crates/document-links",
+    "crates/document-formatting",
+    "crates/on-type-formatting",
+    "crates/formatting",
+    "crates/code-actions",
+    "crates/code-lens",
+    "crates/inlay-hints",
+    "crates/signature-help",
+    "crates/rename",
+    "crates/refactor",
+    "crates/semantic-tokens",
+    "crates/selection-range",
+    "crates/linked-editing",
+    "crates/call-hierarchy",
+    "crates/type-hierarchy",
+    "crates/snippets",
+    "crates/color-picker",
+    "crates/comment-actions",
+    "crates/comment-controller",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # DEBUG & TESTING (DAP)
+    # ═══════════════════════════════════════════════════════════════
+    "crates/dap",
+    "crates/debugger-ui",
+    "crates/debug-console",
+    "crates/testing",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # SOURCE CONTROL
+    # ═══════════════════════════════════════════════════════════════
+    "crates/git",
+    "crates/scm",
+    "crates/diff",
+    "crates/diff-editor",
+    "crates/merge-editor",
+    "crates/source-control-graph",
+    "crates/timeline",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # AI NATIVE LAYER
+    # ═══════════════════════════════════════════════════════════════
+    "crates/ai-core",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # COLLABORATION (Zed DNA)
+    # ═══════════════════════════════════════════════════════════════
+    "crates/collab",
+    "crates/remote",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # MONOREPO INTELLIGENCE (Foxkit Original 🦊)
+    # ═══════════════════════════════════════════════════════════════
+    "crates/monorepo",
+    "crates/task",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # UI FRAMEWORK & PANELS
+    # ═══════════════════════════════════════════════════════════════
+    "crates/ui",
+    "crates/theme",
+    "crates/gpu",
+    "crates/panel",
+    "crates/explorer",
+    "crates/outline",
+    "crates/outline-panel",
+    "crates/problems",
+    "crates/search",
+    "crates/quickopen",
+    "crates/breadcrumbs",
+    "crates/statusbar",
+    "crates/notifications",
+    "crates/output-channel",
+    "crates/interactive-playground",
+    "crates/zen-mode",
+    "crates/file-decorations",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # TERMINAL
+    # ═══════════════════════════════════════════════════════════════
+    "crates/terminal",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # EXTENSION SYSTEM (Theia DNA + Custom)
+    # ═══════════════════════════════════════════════════════════════
+    "crates/extension-host",
+    "crates/wasm-plugins",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # SETTINGS & CONFIGURATION
+    # ═══════════════════════════════════════════════════════════════
+    "crates/settings",
+    "crates/settings-editor",
+    "crates/keybindings",
+    "crates/keybindings-editor",
+    "crates/commands",
+    "crates/auto-save",
+    "crates/file-watcher",
+    "crates/window-management",
+    
+    # ═══════════════════════════════════════════════════════════════
+    # TELEMETRY
+    # ═══════════════════════════════════════════════════════════════
+    "crates/telemetry",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Foxkit Contributors"]
+license = "Apache-2.0"
+repository = "https://github.com/scrapyfox/Foxkit"
+
+[workspace.dependencies]
+# Core
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+parking_lot = "0.12"
+smallvec = "1.13"
+smol_str = "0.2"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# UI & Graphics (Zed-inspired GPUI)
+wgpu = "0.20"
+winit = "0.30"
+cosmic-text = "0.12"
+
+# Web Platform (Theia-inspired)
+wasm-bindgen = "0.2"
+web-sys = "0.3"
+js-sys = "0.3"
+
+# Language Intelligence
+tree-sitter = "0.22"
+lsp-types = "0.95"
+tower-lsp = "0.20"
+
+# AI Integration
+reqwest = { version = "0.12", features = ["json", "stream"] }
+tiktoken-rs = "0.5"
+
+# Collaboration
+operational-transform = "0.6"
+yrs = "0.18"  # Yjs CRDT
+
+# Database & Storage
+rusqlite = { version = "0.31", features = ["bundled"] }
+rocksdb = "0.22"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

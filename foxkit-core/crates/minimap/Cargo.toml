@@ -1,0 +1,10 @@
+[package]
+name = "minimap"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Minimap - code overview and navigation"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true

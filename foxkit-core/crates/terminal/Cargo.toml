@@ -1,0 +1,22 @@
+[package]
+name = "terminal"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit terminal - runtime-aware terminal emulator"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+async-trait.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+bytes = "1.7"
+vt100 = "0.15"
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", features = ["term", "process"] }

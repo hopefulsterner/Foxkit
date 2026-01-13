@@ -1,0 +1,17 @@
+[package]
+name = "quickopen"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Quick Open - command palette and fuzzy finder"
+
+[dependencies]
+commands = { path = "../commands" }
+keybindings = { path = "../keybindings" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+fuzzy-matcher = "0.3"

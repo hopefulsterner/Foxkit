@@ -1,0 +1,17 @@
+[package]
+name = "inlay-hints"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Inlay Hints - inline type annotations"
+
+[dependencies]
+lsp = { path = "../lsp" }
+buffer = { path = "../buffer" }
+treesitter = { path = "../treesitter" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

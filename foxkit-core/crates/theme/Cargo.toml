@@ -1,0 +1,13 @@
+[package]
+name = "theme"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Theme - theming and syntax highlighting"
+
+[dependencies]
+serde.workspace = true
+serde_json = "1.0"
+
+anyhow = "1.0"
+tracing = "0.1"
+once_cell = "1.19"

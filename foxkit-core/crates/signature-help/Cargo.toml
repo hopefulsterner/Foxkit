@@ -1,0 +1,15 @@
+[package]
+name = "signature-help"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Signature Help - function parameter hints"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

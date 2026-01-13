@@ -1,0 +1,15 @@
+[package]
+name = "workspace"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Workspace - workspace and multi-root management"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+fs = { path = "../fs" }
+
+serde.workspace = true
+serde_json = "1.0"
+anyhow = "1.0"
+parking_lot.workspace = true
+url = "2.5"

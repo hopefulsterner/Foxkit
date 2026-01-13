@@ -1,0 +1,13 @@
+[package]
+name = "notifications"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Notifications - toast messages and progress indicators"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+parking_lot.workspace = true
+crossbeam-channel = "0.5"
+uuid = { version = "1.6", features = ["v4"] }

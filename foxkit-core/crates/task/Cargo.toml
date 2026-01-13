@@ -1,0 +1,20 @@
+[package]
+name = "task"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Task - task runner and build system"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+terminal = { path = "../terminal" }
+monorepo = { path = "../monorepo" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+glob = "0.3"
+notify = "6.1"

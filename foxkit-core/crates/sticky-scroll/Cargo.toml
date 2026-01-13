@@ -1,0 +1,13 @@
+[package]
+name = "sticky-scroll"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Sticky Scroll - sticky context headers"
+
+[dependencies]
+treesitter = { path = "../treesitter" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

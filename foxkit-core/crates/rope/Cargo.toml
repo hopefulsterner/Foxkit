@@ -1,0 +1,9 @@
+[package]
+name = "rope"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Rope - efficient text data structure"
+
+[dependencies]
+smallvec = "1.13"
+unicode-segmentation = "1.10"

@@ -1,0 +1,16 @@
+[package]
+name = "workspace-symbols"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Workspace Symbols - global symbol search"
+
+[dependencies]
+lsp = { path = "../lsp" }
+quickopen = { path = "../quickopen" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

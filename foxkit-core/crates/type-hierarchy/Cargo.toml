@@ -1,0 +1,15 @@
+[package]
+name = "type-hierarchy"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Type Hierarchy - supertypes/subtypes"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

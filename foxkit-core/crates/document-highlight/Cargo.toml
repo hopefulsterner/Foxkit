@@ -1,0 +1,15 @@
+[package]
+name = "document-highlight"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Document Highlight - occurrence highlighting"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

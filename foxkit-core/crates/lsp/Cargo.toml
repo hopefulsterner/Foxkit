@@ -1,0 +1,20 @@
+[package]
+name = "lsp"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit LSP - Language Server Protocol client"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+lsp-types = "0.95"

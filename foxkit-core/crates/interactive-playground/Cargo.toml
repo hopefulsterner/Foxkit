@@ -1,0 +1,16 @@
+[package]
+name = "interactive-playground"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Interactive Playground - code playground and scratch files"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"
+chrono = { version = "0.4", features = ["serde"] }

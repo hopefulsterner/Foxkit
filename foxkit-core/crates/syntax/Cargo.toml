@@ -1,0 +1,15 @@
+[package]
+name = "syntax"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Syntax - tree-sitter syntax highlighting"
+
+[dependencies]
+theme = { path = "../theme" }
+rope = { path = "../rope" }
+
+tree-sitter = "0.22"
+once_cell = "1.19"
+parking_lot.workspace = true
+serde.workspace = true
+anyhow = "1.0"

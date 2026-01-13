@@ -1,0 +1,15 @@
+[package]
+name = "source-control-graph"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Source Control Graph - Git graph visualization"
+
+[dependencies]
+git = { path = "../git" }
+
+parking_lot.workspace = true
+serde.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"
+chrono = { version = "0.4", features = ["serde"] }

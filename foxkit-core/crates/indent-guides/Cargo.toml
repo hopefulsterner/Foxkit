@@ -1,0 +1,13 @@
+[package]
+name = "indent-guides"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Indent Guides - visual indentation guides"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

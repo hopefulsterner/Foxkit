@@ -1,0 +1,17 @@
+[package]
+name = "keybindings-editor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Keybindings Editor - keyboard shortcut configuration"
+
+[dependencies]
+keybindings = { path = "../keybindings" }
+commands = { path = "../commands" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

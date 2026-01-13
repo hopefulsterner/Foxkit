@@ -1,0 +1,16 @@
+[package]
+name = "file-watcher"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit File Watcher - file system change detection"
+
+[dependencies]
+fs = { path = "../fs" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+notify = "6.1"

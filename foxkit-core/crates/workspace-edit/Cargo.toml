@@ -1,0 +1,15 @@
+[package]
+name = "workspace-edit"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Workspace Edit - atomic multi-file edits"
+
+[dependencies]
+fs = { path = "../fs" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

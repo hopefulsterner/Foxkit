@@ -1,0 +1,12 @@
+[package]
+name = "buffer"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Buffer - text buffer with undo/redo"
+
+[dependencies]
+rope = { path = "../rope" }
+foxkit-core = { path = "../foxkit-core" }
+
+parking_lot.workspace = true
+smallvec = "1.13"

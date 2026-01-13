@@ -1,0 +1,16 @@
+[package]
+name = "settings-editor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Settings Editor - configuration UI"
+
+[dependencies]
+settings = { path = "../settings" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

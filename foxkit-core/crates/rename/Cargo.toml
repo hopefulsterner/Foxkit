@@ -1,0 +1,16 @@
+[package]
+name = "rename"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Rename - symbol renaming with preview"
+
+[dependencies]
+lsp = { path = "../lsp" }
+workspace = { path = "../workspace" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

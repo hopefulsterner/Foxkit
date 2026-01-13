@@ -1,0 +1,21 @@
+[package]
+name = "foxkit-core"
+version.workspace = true
+edition.workspace = true
+description = "Core foundation for Foxkit IDE"
+
+[dependencies]
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+uuid = { version = "1.10", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }

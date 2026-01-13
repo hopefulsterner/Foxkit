@@ -1,0 +1,16 @@
+[package]
+name = "on-type-formatting"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit On-Type Formatting - auto-format while typing"
+
+[dependencies]
+lsp = { path = "../lsp" }
+document-formatting = { path = "../document-formatting" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

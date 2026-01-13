@@ -1,0 +1,13 @@
+[package]
+name = "snippets"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Snippets - code snippet management"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+serde_json = "1.0"
+anyhow = "1.0"
+regex = "1.10"

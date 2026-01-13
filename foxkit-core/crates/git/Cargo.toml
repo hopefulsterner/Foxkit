@@ -1,0 +1,16 @@
+[package]
+name = "git"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Git - git integration"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+gix = { version = "0.58", default-features = false, features = ["blocking-network-client"] }

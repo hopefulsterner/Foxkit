@@ -1,0 +1,12 @@
+[package]
+name = "commands"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Commands - command palette and command registry"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+parking_lot.workspace = true
+once_cell.workspace = true

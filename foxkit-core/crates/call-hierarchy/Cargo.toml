@@ -1,0 +1,15 @@
+[package]
+name = "call-hierarchy"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Call Hierarchy - incoming/outgoing calls"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

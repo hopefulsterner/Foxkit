@@ -1,0 +1,13 @@
+[package]
+name = "panel"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Panel - panel and view system"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+ui = { path = "../ui" }
+
+serde.workspace = true
+anyhow = "1.0"
+parking_lot.workspace = true

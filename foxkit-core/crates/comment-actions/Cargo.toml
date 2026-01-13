@@ -1,0 +1,15 @@
+[package]
+name = "comment-actions"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Comment Actions - toggle and manipulate comments"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

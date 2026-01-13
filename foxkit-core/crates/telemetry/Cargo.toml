@@ -1,0 +1,30 @@
+[package]
+name = "telemetry"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Telemetry - metrics, logging, and tracing"
+
+[dependencies]
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+
+# Metrics
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.16", optional = true }
+
+# OpenTelemetry
+opentelemetry = { version = "0.27", optional = true }
+opentelemetry-otlp = { version = "0.27", optional = true }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+[features]
+default = []
+prometheus = ["metrics-exporter-prometheus"]
+otlp = ["opentelemetry", "opentelemetry-otlp"]

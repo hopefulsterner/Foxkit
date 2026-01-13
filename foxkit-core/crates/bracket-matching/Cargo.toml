@@ -1,0 +1,15 @@
+[package]
+name = "bracket-matching"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Bracket Matching - highlight and navigate matching brackets"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

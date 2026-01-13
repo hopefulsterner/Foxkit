@@ -1,0 +1,12 @@
+[package]
+name = "zen-mode"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Zen Mode - distraction-free editing"
+
+[dependencies]
+parking_lot.workspace = true
+serde.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+
+tracing = "0.1"

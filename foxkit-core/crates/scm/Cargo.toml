@@ -1,0 +1,17 @@
+[package]
+name = "scm"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit SCM - Source Control Management UI"
+
+[dependencies]
+git = { path = "../git" }
+diff = { path = "../diff" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
+async-trait = "0.1"

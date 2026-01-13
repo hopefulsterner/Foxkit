@@ -1,0 +1,15 @@
+[package]
+name = "multi-cursor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Multi-Cursor - multiple cursor editing"
+
+[dependencies]
+buffer = { path = "../buffer" }
+selection = { path = "../selection" }
+
+parking_lot.workspace = true
+serde.workspace = true
+tokio.workspace = true
+
+tracing = "0.1"

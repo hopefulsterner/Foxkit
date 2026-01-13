@@ -1,0 +1,13 @@
+[package]
+name = "word-wrap"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Word Wrap - text wrapping configuration and rendering"
+
+[dependencies]
+buffer = { path = "../buffer" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

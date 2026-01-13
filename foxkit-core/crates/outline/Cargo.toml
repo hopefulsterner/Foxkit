@@ -1,0 +1,11 @@
+[package]
+name = "outline"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Outline - document outline and symbols"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+serde.workspace = true
+parking_lot.workspace = true

@@ -1,0 +1,22 @@
+[package]
+name = "ai-core"
+version.workspace = true
+edition.workspace = true
+description = "AI-native core for Foxkit - the intelligent brain 🧠"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+tiktoken-rs.workspace = true
+
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+async-stream = "0.3"
+bytes = "1.7"

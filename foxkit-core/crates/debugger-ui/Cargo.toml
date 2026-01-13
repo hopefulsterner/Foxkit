@@ -1,0 +1,17 @@
+[package]
+name = "debugger-ui"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Debugger UI - debug session UI components"
+
+[dependencies]
+dap = { path = "../dap" }
+ui = { path = "../ui" }
+editor = { path = "../editor" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

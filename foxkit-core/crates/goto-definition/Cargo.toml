@@ -1,0 +1,15 @@
+[package]
+name = "goto-definition"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Go to Definition - definition navigation"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

@@ -1,0 +1,17 @@
+[package]
+name = "semantic-tokens"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Semantic Tokens - semantic syntax highlighting"
+
+[dependencies]
+lsp = { path = "../lsp" }
+treesitter = { path = "../treesitter" }
+theme = { path = "../theme" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

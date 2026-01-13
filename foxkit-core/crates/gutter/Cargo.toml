@@ -1,0 +1,14 @@
+[package]
+name = "gutter"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Gutter - line number and indicator gutter"
+
+[dependencies]
+buffer = { path = "../buffer" }
+diagnostics = { path = "../diagnostics" }
+
+parking_lot.workspace = true
+serde.workspace = true
+
+tracing = "0.1"

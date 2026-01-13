@@ -1,0 +1,13 @@
+[package]
+name = "statusbar"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Status Bar - bottom status bar"
+
+[dependencies]
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

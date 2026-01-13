@@ -1,0 +1,16 @@
+[package]
+name = "diff-editor"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Diff Editor - side-by-side diff viewing and editing"
+
+[dependencies]
+buffer = { path = "../buffer" }
+diff = { path = "../diff" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"

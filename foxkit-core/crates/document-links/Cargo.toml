@@ -1,0 +1,16 @@
+[package]
+name = "document-links"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Document Links - clickable URLs and file links"
+
+[dependencies]
+lsp = { path = "../lsp" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+regex = "1.10"
+
+anyhow = "1.0"
+tracing = "0.1"

@@ -1,0 +1,16 @@
+[package]
+name = "selection-range"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit Selection Range - smart selection expansion"
+
+[dependencies]
+lsp = { path = "../lsp" }
+treesitter = { path = "../treesitter" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"
+tracing = "0.1"
