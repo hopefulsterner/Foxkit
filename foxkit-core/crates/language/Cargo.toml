@@ -1,0 +1,16 @@
+[package]
+name = "language"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit language definitions and grammar support"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+treesitter = { path = "../treesitter" }
+syntax = { path = "../syntax" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+anyhow = "1.0"

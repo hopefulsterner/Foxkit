@@ -1,0 +1,15 @@
+[package]
+name = "platform-native"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit native platform abstractions (window, input, clipboard)"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+
+winit.workspace = true
+anyhow = "1.0"

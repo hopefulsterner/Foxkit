@@ -1,0 +1,14 @@
+[package]
+name = "foxkit-ui"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit UI components and widgets"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+foxkit-gpui = { path = "../foxkit-gpui" }
+theme = { path = "../theme" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true

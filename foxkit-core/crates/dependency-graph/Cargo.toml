@@ -1,0 +1,16 @@
+[package]
+name = "dependency-graph"
+version.workspace = true
+edition.workspace = true
+description = "Foxkit dependency graph analysis for monorepos"
+
+[dependencies]
+foxkit-core = { path = "../foxkit-core" }
+
+tokio.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+petgraph = "0.6"
+anyhow = "1.0"
