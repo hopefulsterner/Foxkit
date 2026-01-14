@@ -1,9 +1,0 @@
-/workspaces/Foxkit/foxkit-core/target/debug/deps/gix_url-0e8a6928b7a64650.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/expand_path.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/scheme.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/impls.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/parse.rs
-
-/workspaces/Foxkit/foxkit-core/target/debug/deps/libgix_url-0e8a6928b7a64650.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/expand_path.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/scheme.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/impls.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/parse.rs
-
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/lib.rs:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/expand_path.rs:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/scheme.rs:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/impls.rs:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gix-url-0.27.5/src/parse.rs:
