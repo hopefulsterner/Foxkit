@@ -332,7 +332,7 @@ impl Node {
         let mut col = 0;
         let mut pos = 0;
 
-        for chunk_str in ChunkIterator { stack: vec![self] } {
+        for chunk_str in (ChunkIterator { stack: vec![self] }) {
             for c in chunk_str.chars() {
                 if pos == offset {
                     return Point { line, column: col };

@@ -164,7 +164,8 @@ impl TaskRunner {
     }
 
     /// Run a task
-    pub async fn run(&mut self, id: TaskId) -> Result<TaskStatus> {
+    pub fn run(&mut self, id: TaskId) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<TaskStatus>> + Send + '_>> {
+        Box::pin(async move {
         // Check dependencies first
         if let Some(task) = self.tasks.get(&id) {
             for dep_id in task.depends_on.clone() {
@@ -182,13 +183,19 @@ impl TaskRunner {
             .ok_or_else(|| anyhow::anyhow!("Task not found"))?;
         
         task.status = TaskStatus::Running;
-        self.send_output(id, OutputType::Status, format!("Running: {}", task.name));
+        let task_name = task.name.clone();
+        let task_command = task.command.clone();
+        let task_args = task.args.clone();
+        let task_cwd = task.cwd.clone();
+        let task_env = task.env.clone();
+        
+        self.send_output(id, OutputType::Status, format!("Running: {}", task_name));
 
         // Build command
-        let mut cmd = Command::new(&task.command);
-        cmd.args(&task.args);
-        cmd.current_dir(&task.cwd);
-        cmd.envs(&task.env);
+        let mut cmd = Command::new(&task_command);
+        cmd.args(&task_args);
+        cmd.current_dir(&task_cwd);
+        cmd.envs(&task_env);
         
         // Capture output
         cmd.stdout(std::process::Stdio::piped());
@@ -251,6 +258,7 @@ impl TaskRunner {
         self.send_output(id, OutputType::Status, format!("Completed: {:?}", task_status));
 
         Ok(task_status)
+        })
     }
 
     /// Run multiple tasks in parallel

@@ -20,6 +20,12 @@ impl Query {
         self.inner.capture_names()
     }
 
+    /// Count matches (avoids lifetime issues)
+    pub fn match_count(&self, node: Node<'_>, source: &str) -> usize {
+        let mut cursor = tree_sitter::QueryCursor::new();
+        cursor.matches(&self.inner, node.inner, source.as_bytes()).count()
+    }
+
     /// Execute query and get matches
     pub fn matches<'a>(&'a self, node: Node<'a>, source: &'a str) -> Vec<QueryMatch<'a>> {
         let mut cursor = tree_sitter::QueryCursor::new();

@@ -55,7 +55,7 @@ impl LspClient {
         *self.state.write() = ServerState::Starting;
 
         // Start process
-        let process = ServerProcess::spawn(&self.config)?;
+        let mut process = ServerProcess::spawn(&self.config)?;
         let transport = Transport::new(process.stdin(), process.stdout());
 
         self.process = Some(process);

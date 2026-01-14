@@ -71,19 +71,19 @@ impl TreeSitterService {
         self.trees.write().remove(file_id);
     }
 
-    /// Query the syntax tree
+    /// Query the syntax tree (simplified - returns basic match info)
     pub fn query(
         &self,
         language_id: &str,
         query_source: &str,
         tree: &Tree,
         source: &str,
-    ) -> anyhow::Result<Vec<QueryMatch>> {
+    ) -> anyhow::Result<usize> {
         let language = Language::from_id(language_id)
             .ok_or_else(|| anyhow::anyhow!("Unknown language: {}", language_id))?;
         
         let query = Query::new(language, query_source)?;
-        Ok(query.matches(tree.root_node(), source))
+        Ok(query.match_count(tree.root_node(), source))
     }
 
     /// Get syntax highlighter

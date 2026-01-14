@@ -104,19 +104,17 @@ impl Renderer {
             layout: Some(&pipeline_layout),
             vertex: VertexState {
                 module: &shader,
-                entry_point: Some("vs_main"),
+                entry_point: "vs_main",
                 buffers: &[Vertex::desc()],
-                compilation_options: Default::default(),
             },
             fragment: Some(FragmentState {
                 module: &shader,
-                entry_point: Some("fs_main"),
+                entry_point: "fs_main",
                 targets: &[Some(ColorTargetState {
                     format,
                     blend: Some(BlendState::ALPHA_BLENDING),
                     write_mask: ColorWrites::ALL,
                 })],
-                compilation_options: Default::default(),
             }),
             primitive: PrimitiveState {
                 topology: PrimitiveTopology::TriangleList,
@@ -130,7 +128,6 @@ impl Renderer {
             depth_stencil: None,
             multisample: MultisampleState::default(),
             multiview: None,
-            cache: None,
         });
 
         let max_vertices = 65536;
@@ -170,7 +167,7 @@ impl Renderer {
     }
 
     /// Render a scene
-    pub fn render(&self, pass: &mut RenderPass, scene: &Scene) {
+    pub fn render<'a>(&'a self, pass: &mut RenderPass<'a>, scene: &Scene) {
         // Update uniforms
         let uniforms = Uniforms {
             viewport: self.viewport_size,

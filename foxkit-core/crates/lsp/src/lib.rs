@@ -125,7 +125,7 @@ pub mod servers {
 /// LSP request/response types
 #[derive(Debug)]
 pub struct PendingRequest {
-    pub id: RequestId,
+    pub id: i32,
     pub method: String,
     pub sent_at: std::time::Instant,
 }

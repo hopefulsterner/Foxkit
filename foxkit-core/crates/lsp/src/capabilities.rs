@@ -62,22 +62,14 @@ fn build_workspace_capabilities() -> WorkspaceClientCapabilities {
         code_lens: Some(CodeLensWorkspaceClientCapabilities {
             refresh_support: Some(true),
         }),
-        file_operations: Some(FileOperationClientCapabilities {
-            dynamic_registration: Some(true),
-            did_create: Some(true),
-            will_create: Some(true),
-            did_rename: Some(true),
-            will_rename: Some(true),
-            did_delete: Some(true),
-            will_delete: Some(true),
-        }),
+        file_operations: None,
         inline_value: Some(InlineValueWorkspaceClientCapabilities {
             refresh_support: Some(true),
         }),
         inlay_hint: Some(InlayHintWorkspaceClientCapabilities {
             refresh_support: Some(true),
         }),
-        diagnostics: Some(DiagnosticWorkspaceClientCapabilities {
+        diagnostic: Some(DiagnosticWorkspaceClientCapabilities {
             refresh_support: Some(true),
         }),
     }
@@ -160,7 +152,6 @@ fn build_text_document_capabilities() -> TextDocumentClientCapabilities {
             tag_support: Some(TagSupport {
                 value_set: vec![SymbolTag::DEPRECATED],
             }),
-            label_support: Some(true),
         }),
         formatting: Some(DynamicRegistrationClientCapabilities {
             dynamic_registration: Some(true),
@@ -523,7 +514,7 @@ impl ServerCapabilityAnalyzer {
     pub fn supports_inlay_hints(&self) -> bool {
         matches!(
             &self.capabilities.inlay_hint_provider,
-            Some(OneOf::Left(InlayHintServerCapabilities::Options(_)) | OneOf::Right(_))
+            Some(OneOf::Left(true) | OneOf::Right(_))
         )
     }
 
@@ -539,10 +530,8 @@ impl ServerCapabilityAnalyzer {
     }
 
     pub fn supports_type_hierarchy(&self) -> bool {
-        matches!(
-            &self.capabilities.type_hierarchy_provider,
-            Some(TypeHierarchyServerCapability::Simple(true) | TypeHierarchyServerCapability::Options(_))
-        )
+        // type_hierarchy_provider not available in this lsp-types version
+        false
     }
 
     pub fn get_completion_trigger_characters(&self) -> Vec<String> {

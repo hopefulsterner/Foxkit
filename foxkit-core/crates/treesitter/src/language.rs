@@ -28,22 +28,22 @@ impl Language {
     pub fn ts_language(&self) -> TSLanguage {
         match self {
             #[cfg(feature = "rust")]
-            Language::Rust => tree_sitter_rust::LANGUAGE.into(),
+            Language::Rust => tree_sitter_rust::language().into(),
             
             #[cfg(feature = "javascript")]
-            Language::JavaScript => tree_sitter_javascript::LANGUAGE.into(),
+            Language::JavaScript => tree_sitter_javascript::language().into(),
             
             #[cfg(feature = "typescript")]
-            Language::TypeScript => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+            Language::TypeScript => tree_sitter_typescript::language_typescript().into(),
             
             #[cfg(feature = "typescript")]
-            Language::Tsx => tree_sitter_typescript::LANGUAGE_TSX.into(),
+            Language::Tsx => tree_sitter_typescript::language_tsx().into(),
             
             #[cfg(feature = "python")]
-            Language::Python => tree_sitter_python::LANGUAGE.into(),
+            Language::Python => tree_sitter_python::language().into(),
             
             #[cfg(feature = "json")]
-            Language::Json => tree_sitter_json::LANGUAGE.into(),
+            Language::Json => tree_sitter_json::language().into(),
             
             // Fallback for disabled features or unsupported languages
             _ => panic!("Language not available: {:?}", self),

@@ -17,7 +17,8 @@ impl Chord {
 
     /// Parse from string like "ctrl+shift+p"
     pub fn parse(s: &str) -> Option<Self> {
-        let parts: Vec<&str> = s.to_lowercase().split('+').collect();
+        let lowercased = s.to_lowercase();
+        let parts: Vec<&str> = lowercased.split('+').collect();
         if parts.is_empty() {
             return None;
         }

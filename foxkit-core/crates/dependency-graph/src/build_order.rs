@@ -56,7 +56,7 @@ impl BuildOrderComputer {
         // Kahn's algorithm for topological sort with stages
         let mut stages = Vec::new();
         let mut queue: VecDeque<String> = in_degree.iter()
-            .filter(|(_, &deg)| deg == 0)
+            .filter(|&(_, deg)| *deg == 0)
             .map(|(name, _)| name.clone())
             .collect();
         

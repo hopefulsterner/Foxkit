@@ -77,7 +77,6 @@ impl Gpu {
                     label: Some("Foxkit GPU"),
                     required_features: Features::empty(),
                     required_limits: Limits::default(),
-                    memory_hints: MemoryHints::Performance,
                 },
                 None,
             )
