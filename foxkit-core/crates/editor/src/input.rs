@@ -163,7 +163,7 @@ impl InputHandler {
             }
             
             // V -> Visual line mode
-            (Key::Char('V'), _) | (Key::Char('v'), m) if m.shift => {
+            (Key::Char('V'), m) | (Key::Char('v'), m) if m.shift => {
                 editor.set_mode(EditorMode::VisualLine);
                 InputResult::Handled
             }

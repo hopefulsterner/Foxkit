@@ -128,13 +128,30 @@ impl SelectionSet {
         self.selections.iter_mut()
     }
 
+    /// Clear all selections
+    pub fn clear(&mut self) {
+        self.selections.clear();
+    }
+
+    /// Set selections from anchor/head pairs
+    pub fn set_from_pairs(&mut self, pairs: &[(usize, usize)]) {
+        self.selections.clear();
+        for &(anchor, head) in pairs {
+            self.selections.push(Selection::new(anchor, head));
+        }
+        if self.selections.is_empty() {
+            self.selections.push(Selection::default());
+        }
+        self.normalize();
+    }
+
     /// Merge overlapping selections
     fn normalize(&mut self) {
         // Sort by start position
         self.selections.sort_by_key(|s| s.range().0);
         
         // Merge overlapping
-        let mut merged = Vec::with_capacity(self.selections.len());
+        let mut merged: Vec<Selection> = Vec::with_capacity(self.selections.len());
         
         for sel in &self.selections {
             if let Some(last) = merged.last_mut() {
