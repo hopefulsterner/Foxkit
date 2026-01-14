@@ -1,7 +1,6 @@
 //! UI elements
 
 use std::sync::atomic::{AtomicU64, Ordering};
-use smallvec::SmallVec;
 
 use crate::{Style, Bounds, LayoutContext, Event};
 
@@ -30,8 +29,8 @@ pub struct Element {
     pub kind: ElementKind,
     /// Style
     pub style: Style,
-    /// Children
-    pub children: SmallVec<[Element; 4]>,
+    /// Children (boxed to avoid infinite size)
+    pub children: Vec<Box<Element>>,
     /// Computed bounds (after layout)
     pub bounds: Bounds,
     /// Is interactive?
@@ -47,7 +46,7 @@ impl Element {
             id: ElementId::new(),
             kind,
             style: Style::default(),
-            children: SmallVec::new(),
+            children: Vec::new(),
             bounds: Bounds::default(),
             interactive: false,
             handlers: Vec::new(),
@@ -91,13 +90,13 @@ impl Element {
 
     /// Add child
     pub fn child(mut self, child: Element) -> Self {
-        self.children.push(child);
+        self.children.push(Box::new(child));
         self
     }
 
     /// Add multiple children
     pub fn children(mut self, children: impl IntoIterator<Item = Element>) -> Self {
-        self.children.extend(children);
+        self.children.extend(children.into_iter().map(Box::new));
         self
     }
 

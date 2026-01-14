@@ -28,6 +28,7 @@ use anyhow::Result;
 
 pub use package::{Package, PackageKind, PackageManager};
 pub use graph::DependencyGraph;
+pub use detector::{find_package_for_path, detect_package_at};
 pub use impact::ImpactAnalysis;
 
 /// Monorepo intelligence service

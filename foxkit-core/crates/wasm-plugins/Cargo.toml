@@ -8,6 +8,7 @@ description = "Foxkit WASM Plugins - WebAssembly plugin system"
 tokio.workspace = true
 parking_lot.workspace = true
 serde.workspace = true
+async-trait.workspace = true
 
 anyhow = "1.0"
 tracing = "0.1"

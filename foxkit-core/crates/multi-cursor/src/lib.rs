@@ -350,7 +350,7 @@ impl Cursor {
 }
 
 /// Position
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Position {
     pub line: u32,
     pub col: u32,

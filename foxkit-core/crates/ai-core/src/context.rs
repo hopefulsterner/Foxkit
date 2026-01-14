@@ -5,6 +5,7 @@
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use anyhow::Result;
+use monorepo::{self, Package};
 
 /// AI Context builder - builds rich context for AI from the monorepo
 pub struct AiContext {
@@ -39,6 +40,18 @@ pub struct PackageContext {
     pub dependencies: Vec<String>,
     pub dependents: Vec<String>,
     pub readme: Option<String>,
+}
+
+impl From<Package> for PackageContext {
+    fn from(pkg: Package) -> Self {
+        Self {
+            name: pkg.name,
+            path: pkg.path,
+            dependencies: pkg.dependencies,
+            dependents: Vec::new(), // TODO: Get this from DependencyGraph
+            readme: None,           // Loaded separately if needed
+        }
+    }
 }
 
 impl AiContext {
@@ -198,7 +211,27 @@ impl ContextBuilder {
         let content = tokio::fs::read_to_string(file).await?;
         context = context.with_custom("File Content", content);
         
-        // TODO: Add smart context gathering
+        // --- Smart Monorepo-Aware Context Gathering ---
+        
+        // 1. Detect package for the current file
+        if let Some(pkg) = monorepo::find_package_for_path(file).await? {
+            let mut pkg_ctx: PackageContext = pkg.clone().into();
+            
+            // 2. Load README if it exists in the package root
+            let readme_path = pkg.path.join("README.md");
+            if readme_path.exists() {
+                if let Ok(readme_content) = tokio::fs::read_to_string(readme_path).await {
+                    pkg_ctx.readme = Some(readme_content);
+                }
+            }
+            
+            context = context.with_package(pkg_ctx);
+            
+            // 3. Include related files (e.g., entry points)
+            context = context.with_related_files(pkg.entry_points);
+        }
+        
+        // TODO: Further enhancements
         // - Find imports and include relevant parts
         // - Find tests if requested
         // - Include type definitions

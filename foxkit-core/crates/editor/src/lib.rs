@@ -1102,20 +1102,23 @@ impl Editor {
 
     /// Start find
     pub fn find(&mut self, query: &str) {
-        let buffer = self.buffer.read();
-        let content = &buffer.content;
-        
-        let mut matches = Vec::new();
-        let query_lower = query.to_lowercase();
-        let content_lower = content.to_lowercase();
-        
-        // Case-insensitive search by default
-        let mut search_from = 0;
-        while let Some(pos) = content_lower[search_from..].find(&query_lower) {
-            let abs_pos = search_from + pos;
-            matches.push(abs_pos..abs_pos + query.len());
-            search_from = abs_pos + 1;
-        }
+        let matches = {
+            let buffer = self.buffer.read();
+            let content = &buffer.content;
+            
+            let mut matches = Vec::new();
+            let query_lower = query.to_lowercase();
+            let content_lower = content.to_lowercase();
+            
+            // Case-insensitive search by default
+            let mut search_from = 0;
+            while let Some(pos) = content_lower[search_from..].find(&query_lower) {
+                let abs_pos = search_from + pos;
+                matches.push(abs_pos..abs_pos + query.len());
+                search_from = abs_pos + 1;
+            }
+            matches
+        };
         
         let current_match = if !matches.is_empty() {
             // Find match closest to cursor

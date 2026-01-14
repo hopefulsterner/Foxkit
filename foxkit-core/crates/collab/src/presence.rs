@@ -96,8 +96,8 @@ impl UserPresence {
     /// Set selection
     pub fn set_selection(&mut self, file: &str, selection: Selection) {
         self.active_file = Some(file.to_string());
-        self.selection = Some(selection);
         self.cursor = Some(selection.end);
+        self.selection = Some(selection);
         self.touch();
     }
 }

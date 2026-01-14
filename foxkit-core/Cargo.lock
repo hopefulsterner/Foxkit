@@ -110,6 +110,10 @@ dependencies = [
  "bytes",
  "foxkit-core",
  "futures",
+ "globset",
+ "monorepo",
+ "parking_lot",
+ "rayon",
  "reqwest",
  "serde",
  "serde_json",
@@ -117,6 +121,7 @@ dependencies = [
  "tiktoken-rs",
  "tokio",
  "tracing",
+ "walkdir",
 ]
 
 [[package]]
@@ -859,6 +864,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "chrono",
  "crdt",
  "foxkit-core",
  "futures",
@@ -1587,6 +1593,7 @@ version = "0.1.0"
 dependencies = [
  "foxkit-core",
  "serde",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -1716,6 +1723,7 @@ name = "document-formatting"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "lsp",
  "parking_lot",
  "serde",
@@ -6002,6 +6010,7 @@ name = "quickopen"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "commands",
  "fuzzy-matcher",
  "keybindings",
@@ -6777,6 +6786,7 @@ dependencies = [
  "grep-searcher",
  "ignore",
  "memchr",
+ "num_cpus",
  "parking_lot",
  "rayon",
  "regex",
@@ -6982,6 +6992,7 @@ dependencies = [
  "anyhow",
  "dirs 5.0.1",
  "foxkit-core",
+ "once_cell",
  "parking_lot",
  "serde",
  "serde_json",
@@ -6993,6 +7004,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "parking_lot",
+ "regex",
  "serde",
  "serde_json",
  "settings",
@@ -7484,6 +7496,7 @@ dependencies = [
  "glob",
  "monorepo",
  "notify",
+ "num_cpus",
  "parking_lot",
  "serde",
  "serde_json",
@@ -8257,6 +8270,7 @@ dependencies = [
  "gpu",
  "parking_lot",
  "serde",
+ "serde_json",
  "smallvec",
  "theme",
  "tokio",
@@ -8598,6 +8612,7 @@ name = "wasm-plugins"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "bincode",
  "futures",
  "parking_lot",
