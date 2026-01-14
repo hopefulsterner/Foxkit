@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use parking_lot::RwLock;
 use anyhow::Result;
 use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 
 pub use client::CollabClient;
 pub use presence::{Presence, UserPresence, CursorPosition};
@@ -28,7 +29,7 @@ pub use protocol::{Message, Operation};
 pub use room::{Room, RoomId};
 
 /// Unique user identifier
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct UserId(pub Uuid);
 
 impl UserId {

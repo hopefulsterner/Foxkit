@@ -9,6 +9,11 @@
 pub mod cursor;
 pub mod selection;
 pub mod view;
+pub mod text_element;
+pub mod render;
+pub mod scroll;
+pub mod soft_wrap;
+pub mod minimap;
 pub mod input;
 pub mod commands;
 pub mod word;
@@ -21,7 +26,15 @@ use anyhow::Result;
 
 pub use cursor::{Cursor, CursorShape};
 pub use selection::{Selection, SelectionSet};
-pub use view::{EditorView, Viewport};
+pub use view::{EditorView, Viewport, DisplayLine, HighlightSpan, HighlightStyle, DiagnosticMarker, DiagnosticSeverity};
+pub use text_element::{
+    TextLayoutEngine, TextEditorLayout, LineLayout, TextRun, TextStyle,
+    CursorLayout, SelectionLayout, EditorTheme, SyntaxColors,
+};
+pub use render::{EditorRenderer, RenderCommand, LineStyle, RenderMetrics};
+pub use scroll::{ScrollAnimation, ScrollState, EasingFunction};
+pub use soft_wrap::{SoftWrapConfig, SoftWrapEngine, WrappedLine, WrapSegment};
+pub use minimap::{MinimapRenderer, MinimapConfig, MinimapLayout, MinimapTheme};
 pub use word::{word_start, word_end, word_at, CharClass};
 
 /// Editor instance - manages a single editor pane
@@ -1102,20 +1115,23 @@ impl Editor {
 
     /// Start find
     pub fn find(&mut self, query: &str) {
-        let buffer = self.buffer.read();
-        let content = &buffer.content;
-        
-        let mut matches = Vec::new();
-        let query_lower = query.to_lowercase();
-        let content_lower = content.to_lowercase();
-        
-        // Case-insensitive search by default
-        let mut search_from = 0;
-        while let Some(pos) = content_lower[search_from..].find(&query_lower) {
-            let abs_pos = search_from + pos;
-            matches.push(abs_pos..abs_pos + query.len());
-            search_from = abs_pos + 1;
-        }
+        let matches = {
+            let buffer = self.buffer.read();
+            let content = &buffer.content;
+            
+            let mut matches = Vec::new();
+            let query_lower = query.to_lowercase();
+            let content_lower = content.to_lowercase();
+            
+            // Case-insensitive search by default
+            let mut search_from = 0;
+            while let Some(pos) = content_lower[search_from..].find(&query_lower) {
+                let abs_pos = search_from + pos;
+                matches.push(abs_pos..abs_pos + query.len());
+                search_from = abs_pos + 1;
+            }
+            matches
+        };
         
         let current_match = if !matches.is_empty() {
             // Find match closest to cursor

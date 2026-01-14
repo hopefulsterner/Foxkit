@@ -27,8 +27,31 @@ pub async fn detect_packages(root: &Path) -> Result<Vec<Package>> {
     Ok(packages)
 }
 
+/// Find the nearest package that contains the given path
+pub async fn find_package_for_path(path: &Path) -> Result<Option<Package>> {
+    let mut current = if path.is_file() {
+        path.parent().unwrap_or(path)
+    } else {
+        path
+    };
+
+    loop {
+        if let Some(pkg) = detect_package_at(current).await? {
+            return Ok(Some(pkg));
+        }
+
+        if let Some(parent) = current.parent() {
+            current = parent;
+        } else {
+            break;
+        }
+    }
+
+    Ok(None)
+}
+
 /// Check if a directory contains a package
-async fn detect_package_at(path: &Path) -> Result<Option<Package>> {
+pub async fn detect_package_at(path: &Path) -> Result<Option<Package>> {
     // JavaScript/TypeScript (package.json)
     if path.join("package.json").exists() {
         return detect_npm_package(path).await;

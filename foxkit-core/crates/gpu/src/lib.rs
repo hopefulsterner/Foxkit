@@ -12,6 +12,8 @@ pub mod renderer;
 pub mod scene;
 pub mod shaders;
 pub mod text;
+pub mod font;
+pub mod editor_bridge;
 
 use std::sync::Arc;
 use parking_lot::RwLock;
@@ -22,6 +24,8 @@ pub use context::GpuContext;
 pub use renderer::Renderer;
 pub use scene::{Scene, Primitive};
 pub use text::{TextRenderer, GlyphCache};
+pub use font::{FontSystem, FontKey, FontWeight, FontStyle, RasterizedGlyph, GlyphMetrics, FontMetrics, SharedFontSystem};
+pub use editor_bridge::{EditorSceneBuilder, EditorRenderCommand, LineStyle as EditorLineStyle};
 
 /// GPU subsystem
 pub struct Gpu {

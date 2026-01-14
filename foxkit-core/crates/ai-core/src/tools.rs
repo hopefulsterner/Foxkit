@@ -6,6 +6,10 @@ use async_trait::async_trait;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::path::{Path, PathBuf};
+use walkdir::WalkDir;
+use globset::{Glob, GlobSetBuilder};
+use rayon::prelude::*;
 
 /// Tool trait - implement this to create AI-callable tools
 #[async_trait]
@@ -223,12 +227,73 @@ impl Tool for SearchTool {
     }
 
     async fn execute(&self, arguments: Value) -> Result<ToolResult> {
-        let _query = arguments["query"]
+        let query = arguments["query"]
             .as_str()
             .ok_or_else(|| anyhow::anyhow!("query is required"))?;
         
-        // TODO: Implement actual search using ripgrep or similar
-        Ok(ToolResult::success("", "Search not yet implemented"))
+        let path_pattern = arguments["path_pattern"].as_str();
+        let max_results = arguments["max_results"].as_u64().unwrap_or(20) as usize;
+        
+        // Prepare glob filter
+        let glob_set = if let Some(pattern) = path_pattern {
+            let mut builder = GlobSetBuilder::new();
+            builder.add(Glob::new(pattern)?);
+            Some(builder.build()?)
+        } else {
+            None
+        };
+
+        // TODO: Get workspace root from context/settings
+        let root = Path::new(".");
+        
+        // Collect all candidate files
+        let files: Vec<PathBuf> = WalkDir::new(root)
+            .follow_links(false)
+            .into_iter()
+            .filter_entry(|e| {
+                let name = e.file_name().to_string_lossy();
+                name != "target" && name != "node_modules" && !name.starts_with('.')
+            })
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .map(|e| e.path().to_path_buf())
+            .filter(|p| {
+                if let Some(ref gs) = glob_set {
+                    gs.is_match(p)
+                } else {
+                    true
+                }
+            })
+            .collect();
+
+        // Search files in parallel using rayon
+        let mut results: Vec<String> = files.par_iter()
+            .filter_map(|path| {
+                let content = std::fs::read_to_string(path).ok()?;
+                let mut matches = Vec::new();
+                
+                for (i, line) in content.lines().enumerate() {
+                    if line.contains(query) {
+                        matches.push(format!("{}:{}: {}", path.display(), i + 1, line.trim()));
+                        if matches.len() >= max_results { break; }
+                    }
+                }
+                
+                if matches.is_empty() {
+                    None
+                } else {
+                    Some(matches.join("\n"))
+                }
+            })
+            .collect();
+        
+        results.truncate(max_results);
+
+        if results.is_empty() {
+            Ok(ToolResult::success("", "No matches found"))
+        } else {
+            Ok(ToolResult::success("", results.join("\n")))
+        }
     }
 }
 

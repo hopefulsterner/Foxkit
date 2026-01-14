@@ -8,7 +8,8 @@ description = "Foxkit Settings - user and workspace settings management"
 foxkit-core = { path = "../foxkit-core" }
 
 serde.workspace = true
-serde_json = "1.0"
+serde_json.workspace = true
 parking_lot.workspace = true
+once_cell.workspace = true
 anyhow = "1.0"
 dirs = "5.0"

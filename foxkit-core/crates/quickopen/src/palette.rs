@@ -47,14 +47,14 @@ impl CommandPalette {
     }
 
     /// Get filtered commands
-    pub fn filter(&self, query: &str) -> Vec<&PaletteCommand> {
+    pub fn filter(&self, query: &str) -> Vec<PaletteCommand> {
         let commands = self.commands.read();
         let query = query.strip_prefix('>').unwrap_or(query).trim();
         
         if query.is_empty() {
             // Show all, with recent first
             let recent = self.recent.read();
-            let mut result: Vec<_> = commands.iter().collect();
+            let mut result: Vec<_> = commands.iter().cloned().collect();
             
             result.sort_by(|a, b| {
                 let a_recent = recent.iter().position(|id| id == &a.id);
@@ -76,7 +76,7 @@ impl CommandPalette {
             .filter_map(|cmd| {
                 let score = self.matcher.score(&cmd.label(), query)
                     .or_else(|| self.matcher.score(&cmd.id, query));
-                score.map(|s| (cmd, s))
+                score.map(|s| (cmd.clone(), s))
             })
             .collect();
 

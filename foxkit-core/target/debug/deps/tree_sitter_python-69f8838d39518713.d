@@ -1,8 +1,0 @@
-/workspaces/Foxkit/foxkit-core/target/debug/deps/tree_sitter_python-69f8838d39518713.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../src/node-types.json /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/highlights.scm /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/tags.scm
-
-/workspaces/Foxkit/foxkit-core/target/debug/deps/libtree_sitter_python-69f8838d39518713.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../src/node-types.json /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/highlights.scm /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/tags.scm
-
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/lib.rs:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../src/node-types.json:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/highlights.scm:
-/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-python-0.21.0/bindings/rust/../../queries/tags.scm:

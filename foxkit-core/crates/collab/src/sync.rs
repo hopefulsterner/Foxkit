@@ -115,9 +115,8 @@ impl DocumentSync {
     pub fn acknowledge(&mut self, count: usize) {
         // Move acknowledged operations from pending to history
         for _ in 0..count.min(self.pending.len()) {
-            if let Some(op) = self.pending.remove(0) {
-                self.history.push(op);
-            }
+            let op = self.pending.remove(0);
+            self.history.push(op);
         }
     }
 

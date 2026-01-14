@@ -110,6 +110,10 @@ dependencies = [
  "bytes",
  "foxkit-core",
  "futures",
+ "globset",
+ "monorepo",
+ "parking_lot",
+ "rayon",
  "reqwest",
  "serde",
  "serde_json",
@@ -117,6 +121,7 @@ dependencies = [
  "tiktoken-rs",
  "tokio",
  "tracing",
+ "walkdir",
 ]
 
 [[package]]
@@ -859,6 +864,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "chrono",
  "crdt",
  "foxkit-core",
  "futures",
@@ -1587,6 +1593,7 @@ version = "0.1.0"
 dependencies = [
  "foxkit-core",
  "serde",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -1716,6 +1723,7 @@ name = "document-formatting"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "lsp",
  "parking_lot",
  "serde",
@@ -2211,6 +2219,16 @@ dependencies = [
  "memmap2",
  "slotmap",
  "tinyvec",
+ "ttf-parser 0.20.0",
+]
+
+[[package]]
+name = "fontdue"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9099a2f86b8e674b75d03ff154b3fe4c5208ed249ced8d69cc313a9fa40bb488"
+dependencies = [
+ "hashbrown 0.14.5",
  "ttf-parser 0.20.0",
 ]
 
@@ -3500,6 +3518,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "fontdue",
  "foxkit-core",
  "glam",
  "parking_lot",
@@ -6002,6 +6021,7 @@ name = "quickopen"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "commands",
  "fuzzy-matcher",
  "keybindings",
@@ -6777,6 +6797,7 @@ dependencies = [
  "grep-searcher",
  "ignore",
  "memchr",
+ "num_cpus",
  "parking_lot",
  "rayon",
  "regex",
@@ -6982,6 +7003,7 @@ dependencies = [
  "anyhow",
  "dirs 5.0.1",
  "foxkit-core",
+ "once_cell",
  "parking_lot",
  "serde",
  "serde_json",
@@ -6993,6 +7015,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "parking_lot",
+ "regex",
  "serde",
  "serde_json",
  "settings",
@@ -7484,6 +7507,7 @@ dependencies = [
  "glob",
  "monorepo",
  "notify",
+ "num_cpus",
  "parking_lot",
  "serde",
  "serde_json",
@@ -8148,6 +8172,7 @@ name = "treesitter"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "dirs 5.0.1",
  "parking_lot",
  "tokio",
  "tracing",
@@ -8257,6 +8282,7 @@ dependencies = [
  "gpu",
  "parking_lot",
  "serde",
+ "serde_json",
  "smallvec",
  "theme",
  "tokio",
@@ -8598,6 +8624,7 @@ name = "wasm-plugins"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "bincode",
  "futures",
  "parking_lot",

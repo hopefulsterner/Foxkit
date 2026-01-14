@@ -1,10 +1,31 @@
 //! # Foxkit Treesitter
 //!
 //! Syntax tree parsing using tree-sitter.
+//!
+//! ## Features
+//!
+//! - Tree-sitter parsing with incremental updates
+//! - Query support with file-based loading
+//! - Syntax highlighting
+//! - Multiple language support
+//!
+//! ## Query Loading
+//!
+//! The query loader supports loading `.scm` files from disk:
+//!
+//! ```no_run
+//! use treesitter::{QueryLoader, QueryType};
+//!
+//! let loader = QueryLoader::with_default_paths();
+//! if let Some(query) = loader.load("rust", QueryType::Highlights) {
+//!     println!("Loaded: {}", query.source);
+//! }
+//! ```
 
 pub mod language;
 pub mod parser;
 pub mod query;
+pub mod query_loader;
 pub mod highlight;
 
 use std::collections::HashMap;
@@ -14,6 +35,7 @@ use parking_lot::RwLock;
 pub use language::Language;
 pub use parser::{Parser, Tree, Node};
 pub use query::{Query, QueryCapture, QueryMatch};
+pub use query_loader::{QueryLoader, QueryType, LoadedQuery};
 pub use highlight::{Highlighter, HighlightEvent};
 
 /// Tree-sitter service
@@ -22,6 +44,8 @@ pub struct TreeSitterService {
     parsers: RwLock<HashMap<String, Arc<Parser>>>,
     /// Cached trees per file
     trees: RwLock<HashMap<String, Arc<Tree>>>,
+    /// Query loader
+    query_loader: QueryLoader,
 }
 
 impl TreeSitterService {
@@ -29,7 +53,22 @@ impl TreeSitterService {
         Self {
             parsers: RwLock::new(HashMap::new()),
             trees: RwLock::new(HashMap::new()),
+            query_loader: QueryLoader::with_default_paths(),
         }
+    }
+
+    /// Create with custom query loader
+    pub fn with_query_loader(query_loader: QueryLoader) -> Self {
+        Self {
+            parsers: RwLock::new(HashMap::new()),
+            trees: RwLock::new(HashMap::new()),
+            query_loader,
+        }
+    }
+
+    /// Get the query loader
+    pub fn query_loader(&self) -> &QueryLoader {
+        &self.query_loader
     }
 
     /// Get or create parser for language
@@ -89,7 +128,18 @@ impl TreeSitterService {
     /// Get syntax highlighter
     pub fn highlighter(&self, language_id: &str) -> Option<Highlighter> {
         let language = Language::from_id(language_id)?;
+        Some(Highlighter::with_loader(language, &self.query_loader))
+    }
+
+    /// Get highlighter with fallback to embedded queries only
+    pub fn highlighter_embedded(&self, language_id: &str) -> Option<Highlighter> {
+        let language = Language::from_id(language_id)?;
         Some(Highlighter::new(language))
+    }
+
+    /// Load a query for a language and query type
+    pub fn load_query(&self, language_id: &str, query_type: QueryType) -> Option<Arc<LoadedQuery>> {
+        self.query_loader.load(language_id, query_type)
     }
 }
 

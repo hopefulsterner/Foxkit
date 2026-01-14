@@ -7,7 +7,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use async_trait::async_trait;
 use anyhow::Result;
-use parking_lot::RwLock;
+use parking_lot::RwLock as SyncRwLock;
+use tokio::sync::RwLock;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::process::{Child, Command};
@@ -149,12 +150,12 @@ pub struct McpPromptArgument {
 pub struct McpClient {
     name: String,
     config: McpServerConfig,
-    capabilities: RwLock<ServerCapabilities>,
-    tools: RwLock<Vec<McpToolDef>>,
-    resources: RwLock<Vec<McpResource>>,
-    prompts: RwLock<Vec<McpPrompt>>,
-    request_id: RwLock<u64>,
-    connected: RwLock<bool>,
+    capabilities: SyncRwLock<ServerCapabilities>,
+    tools: SyncRwLock<Vec<McpToolDef>>,
+    resources: SyncRwLock<Vec<McpResource>>,
+    prompts: SyncRwLock<Vec<McpPrompt>>,
+    request_id: SyncRwLock<u64>,
+    connected: SyncRwLock<bool>,
     // For stdio transport
     child: RwLock<Option<Child>>,
 }
@@ -165,12 +166,12 @@ impl McpClient {
         Self {
             name: name.into(),
             config,
-            capabilities: RwLock::new(ServerCapabilities::default()),
-            tools: RwLock::new(Vec::new()),
-            resources: RwLock::new(Vec::new()),
-            prompts: RwLock::new(Vec::new()),
-            request_id: RwLock::new(0),
-            connected: RwLock::new(false),
+            capabilities: SyncRwLock::new(ServerCapabilities::default()),
+            tools: SyncRwLock::new(Vec::new()),
+            resources: SyncRwLock::new(Vec::new()),
+            prompts: SyncRwLock::new(Vec::new()),
+            request_id: SyncRwLock::new(0),
+            connected: SyncRwLock::new(false),
             child: RwLock::new(None),
         }
     }
@@ -221,7 +222,7 @@ impl McpClient {
         cmd.stderr(std::process::Stdio::piped());
 
         let child = cmd.spawn()?;
-        *self.child.write() = Some(child);
+        *self.child.write().await = Some(child);
         
         Ok(())
     }
@@ -361,8 +362,9 @@ impl McpClient {
         
         match &self.config {
             McpServerConfig::Stdio { .. } => {
-                if let Some(ref mut child) = *self.child.write() {
-                    if let Some(ref mut stdin) = child.stdin {
+                let mut child_guard = self.child.write().await;
+                if let Some(child) = child_guard.as_mut() {
+                    if let Some(stdin) = child.stdin.as_mut() {
                         stdin.write_all(json.as_bytes()).await?;
                         stdin.write_all(b"\n").await?;
                         stdin.flush().await?;
@@ -380,8 +382,9 @@ impl McpClient {
     async fn receive_response(&self, expected_id: u64) -> Result<Value> {
         match &self.config {
             McpServerConfig::Stdio { .. } => {
-                if let Some(ref mut child) = *self.child.write() {
-                    if let Some(ref mut stdout) = child.stdout.take() {
+                let mut child_guard = self.child.write().await;
+                if let Some(child) = child_guard.as_mut() {
+                    if let Some(stdout) = child.stdout.as_mut() {
                         let mut reader = BufReader::new(stdout);
                         let mut line = String::new();
                         
@@ -415,7 +418,8 @@ impl McpClient {
     pub async fn disconnect(&self) -> Result<()> {
         *self.connected.write() = false;
         
-        if let Some(mut child) = self.child.write().take() {
+        let mut child_guard = self.child.write().await;
+        if let Some(mut child) = child_guard.take() {
             child.kill().await?;
         }
         
@@ -471,13 +475,13 @@ impl Tool for McpTool {
 
 /// Registry of MCP servers
 pub struct McpRegistry {
-    clients: RwLock<HashMap<String, Arc<McpClient>>>,
+    clients: SyncRwLock<HashMap<String, Arc<McpClient>>>,
 }
 
 impl McpRegistry {
     pub fn new() -> Self {
         Self {
-            clients: RwLock::new(HashMap::new()),
+            clients: SyncRwLock::new(HashMap::new()),
         }
     }
 
@@ -495,7 +499,7 @@ impl McpRegistry {
 
     /// Connect all registered servers
     pub async fn connect_all(&self) -> Result<()> {
-        let clients: Vec<_> = self.clients.read().values().cloned().collect();
+        let clients: Vec<Arc<McpClient>> = self.clients.read().values().cloned().collect();
         for client in clients {
             client.connect().await?;
         }
@@ -506,10 +510,11 @@ impl McpRegistry {
     pub fn all_tools(&self) -> Vec<Arc<dyn Tool>> {
         let mut tools: Vec<Arc<dyn Tool>> = Vec::new();
         
-        for (_, client) in self.clients.read().iter() {
+        let clients: Vec<Arc<McpClient>> = self.clients.read().values().cloned().collect();
+        for client in clients {
             if client.is_connected() {
                 for tool_def in client.list_tools() {
-                    tools.push(Arc::new(McpTool::new(Arc::clone(client), tool_def)));
+                    tools.push(Arc::new(McpTool::new(Arc::clone(&client), tool_def)));
                 }
             }
         }

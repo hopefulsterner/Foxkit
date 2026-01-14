@@ -9,6 +9,7 @@ foxkit-core = { path = "../foxkit-core" }
 rope = { path = "../rope" }
 
 serde.workspace = true
+num_cpus.workspace = true
 anyhow = "1.0"
 regex = "1.10"
 memchr = "2.7"

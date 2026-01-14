@@ -286,7 +286,7 @@ impl SettingType {
     pub fn validate(&self, value: &Value) -> bool {
         match (self, value) {
             (Self::String { pattern }, Value::String(s)) => {
-                if let Some(ref p) = pattern {
+                if let Some(p) = pattern {
                     regex::Regex::new(p)
                         .map(|r| r.is_match(s))
                         .unwrap_or(true)
