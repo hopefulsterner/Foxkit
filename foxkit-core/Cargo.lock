@@ -2223,6 +2223,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fontdue"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9099a2f86b8e674b75d03ff154b3fe4c5208ed249ced8d69cc313a9fa40bb488"
+dependencies = [
+ "hashbrown 0.14.5",
+ "ttf-parser 0.20.0",
+]
+
+[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3508,6 +3518,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "fontdue",
  "foxkit-core",
  "glam",
  "parking_lot",

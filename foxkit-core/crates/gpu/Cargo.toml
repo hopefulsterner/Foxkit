@@ -17,3 +17,6 @@ raw-window-handle = "0.6"
 wgpu = "0.19"
 bytemuck = { version = "1.14", features = ["derive"] }
 glam = "0.25"
+
+# Font rasterization
+fontdue = "0.8"

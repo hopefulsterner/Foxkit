@@ -11,6 +11,9 @@ pub mod selection;
 pub mod view;
 pub mod text_element;
 pub mod render;
+pub mod scroll;
+pub mod soft_wrap;
+pub mod minimap;
 pub mod input;
 pub mod commands;
 pub mod word;
@@ -29,6 +32,9 @@ pub use text_element::{
     CursorLayout, SelectionLayout, EditorTheme, SyntaxColors,
 };
 pub use render::{EditorRenderer, RenderCommand, LineStyle, RenderMetrics};
+pub use scroll::{ScrollAnimation, ScrollState, EasingFunction};
+pub use soft_wrap::{SoftWrapConfig, SoftWrapEngine, WrappedLine, WrapSegment};
+pub use minimap::{MinimapRenderer, MinimapConfig, MinimapLayout, MinimapTheme};
 pub use word::{word_start, word_end, word_at, CharClass};
 
 /// Editor instance - manages a single editor pane
