@@ -9,6 +9,8 @@
 pub mod cursor;
 pub mod selection;
 pub mod view;
+pub mod text_element;
+pub mod render;
 pub mod input;
 pub mod commands;
 pub mod word;
@@ -21,7 +23,12 @@ use anyhow::Result;
 
 pub use cursor::{Cursor, CursorShape};
 pub use selection::{Selection, SelectionSet};
-pub use view::{EditorView, Viewport};
+pub use view::{EditorView, Viewport, DisplayLine, HighlightSpan, HighlightStyle, DiagnosticMarker, DiagnosticSeverity};
+pub use text_element::{
+    TextLayoutEngine, TextEditorLayout, LineLayout, TextRun, TextStyle,
+    CursorLayout, SelectionLayout, EditorTheme, SyntaxColors,
+};
+pub use render::{EditorRenderer, RenderCommand, LineStyle, RenderMetrics};
 pub use word::{word_start, word_end, word_at, CharClass};
 
 /// Editor instance - manages a single editor pane
