@@ -3,6 +3,9 @@
 //! Provides conversational AI interface with context-aware assistance,
 //! code generation, and intelligent suggestions.
 
+pub mod commands;
+pub mod actions;
+
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use parking_lot::RwLock;
@@ -10,6 +13,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
+
+pub use commands::{SlashCommand, SlashCommandRegistry, ParsedCommand, CommandContext};
+pub use actions::{CodeAction, CodeActionKind, CodeActionRegistry, ActionContext};
 
 /// Unique identifier for a chat session
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

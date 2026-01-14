@@ -11,15 +11,18 @@ pub mod selection;
 pub mod view;
 pub mod input;
 pub mod commands;
+pub mod word;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::collections::VecDeque;
 use parking_lot::RwLock;
 use anyhow::Result;
 
 pub use cursor::{Cursor, CursorShape};
 pub use selection::{Selection, SelectionSet};
 pub use view::{EditorView, Viewport};
+pub use word::{word_start, word_end, word_at, CharClass};
 
 /// Editor instance - manages a single editor pane
 pub struct Editor {
@@ -37,6 +40,91 @@ pub struct Editor {
     soft_wrap: SoftWrap,
     /// Is this editor focused?
     focused: bool,
+    /// Undo history
+    undo_stack: VecDeque<EditTransaction>,
+    /// Redo history
+    redo_stack: VecDeque<EditTransaction>,
+    /// Current edit group (for grouping edits)
+    edit_group: Option<u64>,
+    /// Clipboard content (local)
+    clipboard: Option<String>,
+    /// Find query
+    find_query: Option<FindState>,
+}
+
+/// An edit transaction for undo/redo
+#[derive(Debug, Clone)]
+pub struct EditTransaction {
+    /// The edits in this transaction
+    pub edits: Vec<SingleEdit>,
+    /// Cursor positions before the edit
+    pub selections_before: Vec<(usize, usize)>,
+    /// Cursor positions after the edit
+    pub selections_after: Vec<(usize, usize)>,
+    /// Timestamp
+    pub timestamp: u64,
+    /// Group ID (for merging related edits)
+    pub group: Option<u64>,
+}
+
+/// A single edit operation
+#[derive(Debug, Clone)]
+pub struct SingleEdit {
+    /// Byte range that was replaced
+    pub range: std::ops::Range<usize>,
+    /// The old text that was there
+    pub old_text: String,
+    /// The new text that replaced it
+    pub new_text: String,
+}
+
+impl SingleEdit {
+    /// Create an insert edit
+    pub fn insert(offset: usize, text: String) -> Self {
+        Self {
+            range: offset..offset,
+            old_text: String::new(),
+            new_text: text,
+        }
+    }
+
+    /// Create a delete edit
+    pub fn delete(range: std::ops::Range<usize>, old_text: String) -> Self {
+        Self {
+            range,
+            old_text,
+            new_text: String::new(),
+        }
+    }
+
+    /// Create a replace edit
+    pub fn replace(range: std::ops::Range<usize>, old_text: String, new_text: String) -> Self {
+        Self {
+            range,
+            old_text,
+            new_text,
+        }
+    }
+
+    /// Get the inverse of this edit (for undo)
+    pub fn inverse(&self) -> Self {
+        Self {
+            range: self.range.start..self.range.start + self.new_text.len(),
+            old_text: self.new_text.clone(),
+            new_text: self.old_text.clone(),
+        }
+    }
+}
+
+/// Find/search state
+#[derive(Debug, Clone)]
+pub struct FindState {
+    pub query: String,
+    pub case_sensitive: bool,
+    pub whole_word: bool,
+    pub regex: bool,
+    pub matches: Vec<std::ops::Range<usize>>,
+    pub current_match: usize,
 }
 
 /// Unique editor identifier
@@ -87,6 +175,11 @@ impl Editor {
             mode: EditorMode::Normal,
             soft_wrap: SoftWrap { enabled: false, column: None },
             focused: false,
+            undo_stack: VecDeque::with_capacity(1000),
+            redo_stack: VecDeque::with_capacity(100),
+            edit_group: None,
+            clipboard: None,
+            find_query: None,
         }
     }
 
@@ -111,6 +204,11 @@ impl Editor {
             mode: EditorMode::Normal,
             soft_wrap: SoftWrap { enabled: false, column: None },
             focused: false,
+            undo_stack: VecDeque::with_capacity(1000),
+            redo_stack: VecDeque::with_capacity(100),
+            edit_group: None,
+            clipboard: None,
+            find_query: None,
         })
     }
 
@@ -161,16 +259,29 @@ impl Editor {
 
     /// Insert text at current cursor position(s)
     pub fn insert(&mut self, text: &str) {
+        // Collect edit info before modifying
+        let selections_snapshot: Vec<_> = self.selections.iter().map(|s| s.head.offset).collect();
+        
         let mut buffer = self.buffer.write();
+        let mut offset_adjustment = 0isize;
         
         // For each selection, insert text
-        for selection in self.selections.iter_mut() {
-            let offset = selection.head.offset;
-            buffer.content.insert_str(offset, text);
+        for (i, selection) in self.selections.iter_mut().enumerate() {
+            let original_offset = selections_snapshot[i];
+            let adjusted_offset = (original_offset as isize + offset_adjustment) as usize;
+            
+            // Record undo for this edit
+            drop(buffer);
+            self.push_edit(adjusted_offset..adjusted_offset, String::new(), text.to_string());
+            buffer = self.buffer.write();
+            
+            buffer.content.insert_str(adjusted_offset, text);
             
             // Update cursor position
-            selection.head.offset += text.len();
+            selection.head.offset = adjusted_offset + text.len();
             selection.anchor = selection.head;
+            
+            offset_adjustment += text.len() as isize;
         }
         
         buffer.dirty = true;
@@ -179,28 +290,42 @@ impl Editor {
 
     /// Delete selection or character before cursor
     pub fn backspace(&mut self) {
-        let mut buffer = self.buffer.write();
+        let buffer_content = self.buffer.read().content.clone();
+        drop(self.buffer.read());
         
         for selection in self.selections.iter_mut() {
             if selection.is_empty() {
                 // Delete char before cursor
                 if selection.head.offset > 0 {
                     let offset = selection.head.offset - 1;
+                    let deleted = buffer_content.chars().nth(offset).map(|c| c.to_string()).unwrap_or_default();
+                    
+                    // Record undo
+                    self.push_edit(offset..selection.head.offset, deleted, String::new());
+                    
+                    let mut buffer = self.buffer.write();
                     buffer.content.remove(offset);
                     selection.head.offset = offset;
                     selection.anchor = selection.head;
+                    buffer.dirty = true;
+                    buffer.version += 1;
                 }
             } else {
                 // Delete selection
                 let (start, end) = selection.range();
+                let deleted = buffer_content[start..end].to_string();
+                
+                // Record undo
+                self.push_edit(start..end, deleted, String::new());
+                
+                let mut buffer = self.buffer.write();
                 buffer.content.replace_range(start..end, "");
                 selection.head.offset = start;
                 selection.anchor = selection.head;
+                buffer.dirty = true;
+                buffer.version += 1;
             }
         }
-        
-        buffer.dirty = true;
-        buffer.version += 1;
     }
 
     /// Move cursor(s) in a direction
@@ -314,47 +439,165 @@ impl Editor {
 
     /// Delete character forward
     pub fn delete_forward(&mut self) {
-        let mut buffer = self.buffer.write();
+        let buffer_content = self.buffer.read().content.clone();
+        
         for selection in self.selections.iter_mut() {
             if selection.is_empty() {
-                if selection.head.offset < buffer.content.len() {
-                    buffer.content.remove(selection.head.offset);
+                if selection.head.offset < buffer_content.len() {
+                    let offset = selection.head.offset;
+                    // Get the character to delete (handles multi-byte)
+                    let char_end = buffer_content[offset..].char_indices()
+                        .nth(1)
+                        .map(|(i, _)| offset + i)
+                        .unwrap_or(buffer_content.len());
+                    
+                    let deleted = buffer_content[offset..char_end].to_string();
+                    
+                    // Record undo
+                    self.push_edit(offset..char_end, deleted, String::new());
+                    
+                    let mut buffer = self.buffer.write();
+                    buffer.content.replace_range(offset..char_end, "");
+                    buffer.dirty = true;
+                    buffer.version += 1;
                 }
             } else {
                 let (start, end) = selection.range();
+                let deleted = buffer_content[start..end].to_string();
+                
+                self.push_edit(start..end, deleted, String::new());
+                
+                let mut buffer = self.buffer.write();
                 buffer.content.replace_range(start..end, "");
                 selection.head.offset = start;
                 selection.anchor = selection.head;
+                buffer.dirty = true;
+                buffer.version += 1;
             }
         }
-        buffer.dirty = true;
-        buffer.version += 1;
     }
 
     /// Delete current line
     pub fn delete_line(&mut self) {
-        // TODO: implement line deletion
+        let buffer_content = self.buffer.read().content.clone();
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            
+            // Find line boundaries
+            let line_start = buffer_content[..offset].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            let line_end = buffer_content[offset..].find('\n')
+                .map(|i| offset + i + 1) // Include the newline
+                .unwrap_or(buffer_content.len());
+            
+            let deleted = buffer_content[line_start..line_end].to_string();
+            
+            // Record undo
+            self.push_edit(line_start..line_end, deleted, String::new());
+            
+            let mut buffer = self.buffer.write();
+            buffer.content.replace_range(line_start..line_end, "");
+            selection.head.offset = line_start.min(buffer.content.len());
+            selection.anchor = selection.head;
+            buffer.dirty = true;
+            buffer.version += 1;
+            break; // Process one line at a time for multi-cursor
+        }
     }
 
     /// Delete word
-    pub fn delete_word(&mut self) {
-        // TODO: implement word deletion
+    pub fn delete_word(&mut self, forward: bool) {
+        let buffer_content = self.buffer.read().content.clone();
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            let (start, end) = if forward {
+                let word_end = word::next_word_boundary(&buffer_content, offset);
+                (offset, word_end)
+            } else {
+                let word_start = word::prev_word_boundary(&buffer_content, offset);
+                (word_start, offset)
+            };
+            
+            if start != end {
+                // Record undo
+                let old_text = buffer_content[start..end].to_string();
+                self.push_edit(start..end, old_text, String::new());
+                
+                let mut buffer = self.buffer.write();
+                buffer.content.replace_range(start..end, "");
+                selection.head.offset = start;
+                selection.anchor = selection.head;
+                buffer.dirty = true;
+                buffer.version += 1;
+            }
+        }
     }
 
     /// Delete to end of line
     pub fn delete_to_line_end(&mut self) {
-        // TODO: implement
+        let buffer_content = self.buffer.read().content.clone();
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            let line_end = buffer_content[offset..].find('\n')
+                .map(|i| offset + i)
+                .unwrap_or(buffer_content.len());
+            
+            if offset < line_end {
+                let deleted = buffer_content[offset..line_end].to_string();
+                
+                self.push_edit(offset..line_end, deleted, String::new());
+                
+                let mut buffer = self.buffer.write();
+                buffer.content.replace_range(offset..line_end, "");
+                buffer.dirty = true;
+                buffer.version += 1;
+            }
+        }
     }
 
     /// Delete to start of line
     pub fn delete_to_line_start(&mut self) {
-        // TODO: implement
+        let buffer_content = self.buffer.read().content.clone();
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            let line_start = buffer_content[..offset].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            
+            if line_start < offset {
+                let deleted = buffer_content[line_start..offset].to_string();
+                
+                self.push_edit(line_start..offset, deleted, String::new());
+                
+                let mut buffer = self.buffer.write();
+                buffer.content.replace_range(line_start..offset, "");
+                selection.head.offset = line_start;
+                selection.anchor = selection.head;
+                buffer.dirty = true;
+                buffer.version += 1;
+            }
+        }
     }
 
     /// Move by word
     pub fn move_word(&mut self, direction: Direction, extend: bool) {
-        // TODO: implement word-wise movement
-        self.move_cursor(direction, extend);
+        let buffer = self.buffer.read();
+        let content = &buffer.content;
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            let new_offset = match direction {
+                Direction::Left => word::prev_word_boundary(content, offset),
+                Direction::Right => word::next_word_boundary(content, offset),
+                _ => offset, // Up/Down not applicable for word movement
+            };
+            
+            selection.head.offset = new_offset;
+            if !extend {
+                selection.anchor = selection.head;
+            }
+        }
     }
 
     /// Move to line start
@@ -428,7 +671,16 @@ impl Editor {
 
     /// Select current word
     pub fn select_word(&mut self) {
-        // TODO: implement word selection
+        let buffer = self.buffer.read();
+        let content = &buffer.content;
+        
+        for selection in self.selections.iter_mut() {
+            let offset = selection.head.offset;
+            if let Some((start, end)) = word::word_at(content, offset) {
+                selection.anchor.offset = start;
+                selection.head.offset = end;
+            }
+        }
     }
 
     /// Expand selection (tree-sitter aware)
@@ -472,13 +724,30 @@ impl Editor {
 
     /// Copy selection to clipboard
     pub fn copy(&mut self) {
-        // TODO: implement clipboard integration
+        let buffer = self.buffer.read();
+        let mut copied_text = String::new();
+        
+        for selection in self.selections.iter() {
+            if !selection.is_empty() {
+                let (start, end) = selection.range();
+                if !copied_text.is_empty() {
+                    copied_text.push('\n');
+                }
+                copied_text.push_str(&buffer.content[start..end]);
+            }
+        }
+        
+        if !copied_text.is_empty() {
+            self.clipboard = Some(copied_text);
+        }
     }
 
     /// Cut selection to clipboard
     pub fn cut(&mut self) {
         self.copy();
-        self.backspace();
+        if self.clipboard.is_some() {
+            self.backspace();
+        }
     }
 
     /// Paste from clipboard
@@ -486,14 +755,137 @@ impl Editor {
         self.insert(text);
     }
 
+    /// Paste from internal clipboard
+    pub fn paste_from_clipboard(&mut self) {
+        if let Some(text) = self.clipboard.clone() {
+            self.insert(&text);
+        }
+    }
+
+    /// Push an edit to the undo stack
+    fn push_edit(&mut self, range: std::ops::Range<usize>, old_text: String, new_text: String) {
+        let selections_before: Vec<(usize, usize)> = self.selections
+            .iter()
+            .map(|s| (s.anchor.offset, s.head.offset))
+            .collect();
+        
+        let edit = SingleEdit {
+            range,
+            old_text,
+            new_text,
+        };
+        
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0);
+        
+        // Check if we should merge with previous edit
+        let should_merge = if let Some(last) = self.undo_stack.back_mut() {
+            // Merge if edits are close in time (< 500ms) and same group
+            timestamp - last.timestamp < 500 && self.edit_group == last.group
+        } else {
+            false
+        };
+        
+        if should_merge {
+            if let Some(last) = self.undo_stack.back_mut() {
+                last.edits.push(edit);
+                last.timestamp = timestamp;
+            }
+        } else {
+            let transaction = EditTransaction {
+                edits: vec![edit],
+                selections_before,
+                selections_after: Vec::new(), // Will be set when transaction completes
+                timestamp,
+                group: self.edit_group,
+            };
+            
+            self.undo_stack.push_back(transaction);
+            
+            // Limit undo stack size
+            if self.undo_stack.len() > 1000 {
+                self.undo_stack.pop_front();
+            }
+        }
+        
+        // Clear redo stack on new edit
+        self.redo_stack.clear();
+    }
+
     /// Undo last edit
     pub fn undo(&mut self) {
-        // TODO: implement with history
+        if let Some(mut transaction) = self.undo_stack.pop_back() {
+            // Store current selections for redo
+            transaction.selections_after = self.selections
+                .iter()
+                .map(|s| (s.anchor.offset, s.head.offset))
+                .collect();
+            
+            let mut buffer = self.buffer.write();
+            
+            // Apply edits in reverse order
+            for edit in transaction.edits.iter().rev() {
+                // Replace new_text with old_text (reverse the edit)
+                let start = edit.range.start;
+                let end = start + edit.new_text.len();
+                buffer.content.replace_range(start..end.min(buffer.content.len()), &edit.old_text);
+            }
+            
+            buffer.dirty = true;
+            buffer.version += 1;
+            drop(buffer);
+            
+            // Restore selections
+            self.selections.clear();
+            for (anchor, head) in &transaction.selections_before {
+                self.selections.add(Selection::new(*anchor, *head));
+            }
+            
+            self.redo_stack.push_back(transaction);
+        }
     }
 
     /// Redo last undone edit
     pub fn redo(&mut self) {
-        // TODO: implement with history
+        if let Some(transaction) = self.redo_stack.pop_back() {
+            let mut buffer = self.buffer.write();
+            
+            // Apply edits in forward order
+            for edit in &transaction.edits {
+                let start = edit.range.start;
+                let end = start + edit.old_text.len();
+                buffer.content.replace_range(start..end.min(buffer.content.len()), &edit.new_text);
+            }
+            
+            buffer.dirty = true;
+            buffer.version += 1;
+            drop(buffer);
+            
+            // Restore selections to after state
+            self.selections.clear();
+            for (anchor, head) in &transaction.selections_after {
+                self.selections.add(Selection::new(*anchor, *head));
+            }
+            
+            self.undo_stack.push_back(transaction);
+        }
+    }
+
+    /// Start an edit group (groups consecutive edits for undo)
+    pub fn start_edit_group(&mut self) {
+        self.edit_group = Some(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0)
+        );
+    }
+
+    /// End current edit group
+    pub fn end_edit_group(&mut self) {
+        self.edit_group = None;
     }
 
     /// Duplicate current line
@@ -518,17 +910,132 @@ impl Editor {
 
     /// Move line up
     pub fn move_line_up(&mut self) {
-        // TODO: implement
+        let buffer_content = self.buffer.read().content.clone();
+        
+        if let Some(selection) = self.selections.primary_mut() {
+            let offset = selection.head.offset;
+            
+            // Find current line boundaries
+            let line_start = buffer_content[..offset].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            
+            // Can't move up if we're on the first line
+            if line_start == 0 {
+                return;
+            }
+            
+            let line_end = buffer_content[offset..].find('\n')
+                .map(|i| offset + i)
+                .unwrap_or(buffer_content.len());
+            
+            // Find previous line start
+            let prev_line_start = buffer_content[..line_start - 1].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            
+            // Get current line content (without trailing newline)
+            let current_line = buffer_content[line_start..line_end].to_string();
+            let prev_line = buffer_content[prev_line_start..line_start - 1].to_string();
+            
+            // Calculate cursor offset within line
+            let cursor_col = offset - line_start;
+            
+            // Record undo for the swap
+            self.push_edit(prev_line_start..line_end, 
+                format!("{}\n{}", prev_line, current_line),
+                format!("{}\n{}", current_line, prev_line));
+            
+            let mut buffer = self.buffer.write();
+            buffer.content.replace_range(prev_line_start..line_end, &format!("{}\n{}", current_line, prev_line));
+            
+            // Update cursor position
+            selection.head.offset = prev_line_start + cursor_col.min(current_line.len());
+            selection.anchor = selection.head;
+            
+            buffer.dirty = true;
+            buffer.version += 1;
+        }
     }
 
     /// Move line down
     pub fn move_line_down(&mut self) {
-        // TODO: implement
+        let buffer_content = self.buffer.read().content.clone();
+        
+        if let Some(selection) = self.selections.primary_mut() {
+            let offset = selection.head.offset;
+            
+            // Find current line boundaries
+            let line_start = buffer_content[..offset].rfind('\n').map(|i| i + 1).unwrap_or(0);
+            let line_end = buffer_content[offset..].find('\n')
+                .map(|i| offset + i)
+                .unwrap_or(buffer_content.len());
+            
+            // Can't move down if we're on the last line
+            if line_end >= buffer_content.len() {
+                return;
+            }
+            
+            // Find next line end
+            let next_line_end = buffer_content[line_end + 1..].find('\n')
+                .map(|i| line_end + 1 + i)
+                .unwrap_or(buffer_content.len());
+            
+            // Get line contents
+            let current_line = buffer_content[line_start..line_end].to_string();
+            let next_line = buffer_content[line_end + 1..next_line_end].to_string();
+            
+            // Calculate cursor offset within line
+            let cursor_col = offset - line_start;
+            
+            // Record undo
+            self.push_edit(line_start..next_line_end,
+                format!("{}\n{}", current_line, next_line),
+                format!("{}\n{}", next_line, current_line));
+            
+            let mut buffer = self.buffer.write();
+            buffer.content.replace_range(line_start..next_line_end, &format!("{}\n{}", next_line, current_line));
+            
+            // Update cursor position (now on line below)
+            let new_line_start = line_start + next_line.len() + 1;
+            selection.head.offset = new_line_start + cursor_col.min(current_line.len());
+            selection.anchor = selection.head;
+            
+            buffer.dirty = true;
+            buffer.version += 1;
+        }
     }
 
     /// Join current line with next
     pub fn join_lines(&mut self) {
-        // TODO: implement
+        let buffer_content = self.buffer.read().content.clone();
+        
+        if let Some(selection) = self.selections.primary_mut() {
+            let offset = selection.head.offset;
+            
+            // Find end of current line
+            if let Some(newline_pos) = buffer_content[offset..].find('\n').map(|i| offset + i) {
+                // Find start of next line content (skip leading whitespace)
+                let next_line_start = newline_pos + 1;
+                if next_line_start < buffer_content.len() {
+                    let next_line_content_start = buffer_content[next_line_start..]
+                        .find(|c: char| !c.is_whitespace() || c == '\n')
+                        .map(|i| next_line_start + i)
+                        .unwrap_or(next_line_start);
+                    
+                    let deleted = buffer_content[newline_pos..next_line_content_start].to_string();
+                    
+                    // Record undo - replace newline and leading whitespace with single space
+                    self.push_edit(newline_pos..next_line_content_start, deleted, " ".to_string());
+                    
+                    let mut buffer = self.buffer.write();
+                    buffer.content.replace_range(newline_pos..next_line_content_start, " ");
+                    
+                    // Move cursor to join point
+                    selection.head.offset = newline_pos;
+                    selection.anchor = selection.head;
+                    
+                    buffer.dirty = true;
+                    buffer.version += 1;
+                }
+            }
+        }
     }
 
     /// Toggle line comment
@@ -569,28 +1076,127 @@ impl Editor {
     }
 
     /// Start find
-    pub fn find(&mut self, _query: &str) {
-        // TODO: implement search
+    pub fn find(&mut self, query: &str) {
+        let buffer = self.buffer.read();
+        let content = &buffer.content;
+        
+        let mut matches = Vec::new();
+        let query_lower = query.to_lowercase();
+        let content_lower = content.to_lowercase();
+        
+        // Case-insensitive search by default
+        let mut search_from = 0;
+        while let Some(pos) = content_lower[search_from..].find(&query_lower) {
+            let abs_pos = search_from + pos;
+            matches.push(abs_pos..abs_pos + query.len());
+            search_from = abs_pos + 1;
+        }
+        
+        let current_match = if !matches.is_empty() {
+            // Find match closest to cursor
+            let cursor_pos = self.selections.primary().map(|s| s.head.offset).unwrap_or(0);
+            matches.iter()
+                .position(|m| m.start >= cursor_pos)
+                .unwrap_or(0)
+        } else {
+            0
+        };
+        
+        self.find_query = Some(FindState {
+            query: query.to_string(),
+            case_sensitive: false,
+            matches,
+            current_match,
+        });
+        
+        // Jump to first match
+        self.find_next();
     }
 
     /// Find next match
     pub fn find_next(&mut self) {
-        // TODO: implement
+        if let Some(ref mut state) = self.find_query {
+            if !state.matches.is_empty() {
+                state.current_match = (state.current_match + 1) % state.matches.len();
+                let match_range = &state.matches[state.current_match];
+                
+                // Select the match
+                if let Some(selection) = self.selections.primary_mut() {
+                    selection.anchor.offset = match_range.start;
+                    selection.head.offset = match_range.end;
+                }
+            }
+        }
     }
 
     /// Find previous match
     pub fn find_previous(&mut self) {
-        // TODO: implement
+        if let Some(ref mut state) = self.find_query {
+            if !state.matches.is_empty() {
+                state.current_match = if state.current_match == 0 {
+                    state.matches.len() - 1
+                } else {
+                    state.current_match - 1
+                };
+                let match_range = &state.matches[state.current_match];
+                
+                // Select the match
+                if let Some(selection) = self.selections.primary_mut() {
+                    selection.anchor.offset = match_range.start;
+                    selection.head.offset = match_range.end;
+                }
+            }
+        }
     }
 
     /// Replace current match
-    pub fn replace(&mut self, _replacement: &str) {
-        // TODO: implement
+    pub fn replace(&mut self, replacement: &str) {
+        if let Some(ref state) = self.find_query.clone() {
+            if !state.matches.is_empty() && state.current_match < state.matches.len() {
+                let match_range = state.matches[state.current_match].clone();
+                let old_text = self.buffer.read().content[match_range.clone()].to_string();
+                
+                self.push_edit(match_range.clone(), old_text, replacement.to_string());
+                
+                let mut buffer = self.buffer.write();
+                buffer.content.replace_range(match_range, replacement);
+                buffer.dirty = true;
+                buffer.version += 1;
+                drop(buffer);
+                
+                // Re-run search to update matches
+                let query = state.query.clone();
+                self.find(&query);
+            }
+        }
     }
 
     /// Replace all matches
-    pub fn replace_all(&mut self, _replacement: &str) {
-        // TODO: implement
+    pub fn replace_all(&mut self, replacement: &str) {
+        if let Some(ref state) = self.find_query.clone() {
+            if state.matches.is_empty() {
+                return;
+            }
+            
+            self.start_edit_group();
+            
+            // Replace from end to start to preserve offsets
+            for match_range in state.matches.iter().rev() {
+                let old_text = self.buffer.read().content[match_range.clone()].to_string();
+                
+                self.push_edit(match_range.clone(), old_text, replacement.to_string());
+                
+                let mut buffer = self.buffer.write();
+                buffer.content.replace_range(match_range.clone(), replacement);
+                buffer.dirty = true;
+                buffer.version += 1;
+            }
+            
+            self.end_edit_group();
+            
+            // Clear find state
+            self.find_query = None;
+        }
     }
 
     /// Save as new file

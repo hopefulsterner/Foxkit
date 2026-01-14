@@ -3,10 +3,17 @@
 //! Language Server Protocol client implementation.
 //! Manages language servers for code intelligence.
 
+pub mod capabilities;
 pub mod client;
 pub mod manager;
 pub mod process;
+pub mod requests;
 pub mod transport;
+pub mod workspace;
+
+pub use capabilities::{build_client_capabilities, ServerCapabilityAnalyzer};
+pub use requests::{LspRequestBuilder, LspNotificationBuilder, file_uri, pos, range};
+pub use workspace::{WorkspaceManager, TextDocument, WorkspaceConfiguration, LanguageConfiguration};
 
 use std::sync::Arc;
 use std::collections::HashMap;

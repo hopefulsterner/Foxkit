@@ -3,10 +3,13 @@
 //! Remote development support with SSH, containers, and cloud.
 
 pub mod connection;
-pub mod ssh;
 pub mod container;
-pub mod tunnel;
 pub mod fs;
+pub mod protocol;
+pub mod ssh;
+pub mod tunnel;
+
+pub use protocol::{RemoteMessage, RemoteCodec, RequestTracker, Keepalive, ServerInfo, DirEntry};
 
 use std::path::PathBuf;
 use std::sync::Arc;

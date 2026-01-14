@@ -3,7 +3,10 @@
 //! Problems, errors, and warnings management (LSP-compatible).
 
 pub mod collection;
+pub mod quickfix;
 pub mod source;
+
+pub use quickfix::{QuickFix, QuickFixKind, QuickFixRegistry, DiagnosticFilter, DiagnosticGrouper};
 
 use std::path::PathBuf;
 use std::collections::HashMap;

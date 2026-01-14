@@ -11,7 +11,10 @@ pub mod client;
 pub mod presence;
 pub mod protocol;
 pub mod room;
+pub mod session;
 pub mod sync;
+
+pub use session::{Session, SessionId, SessionManager, Participant, ParticipantId, ParticipantColor, ParticipantRole, SessionEvent};
 
 use std::sync::Arc;
 use std::collections::HashMap;

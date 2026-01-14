@@ -2,7 +2,10 @@
 //!
 //! Hover information and quick info (LSP-compatible).
 
+pub mod content;
 pub mod provider;
+
+pub use content::{HoverBuilder, SymbolHover, SymbolKind as HoverSymbolKind, ParameterInfo, DiagnosticHover};
 
 use std::sync::Arc;
 use parking_lot::RwLock;

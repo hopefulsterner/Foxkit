@@ -3,12 +3,22 @@
 //! Ghost text suggestions, multi-line completions, and intelligent
 //! code generation inline with the editor.
 
+pub mod providers;
+
 use async_trait::async_trait;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use uuid::Uuid;
+
+pub use providers::{
+    OpenAICompletionProvider,
+    AnthropicCompletionProvider,
+    OllamaCompletionProvider,
+    MultiProviderCompletion,
+    FimFormat,
+};
 
 /// Unique completion request ID
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

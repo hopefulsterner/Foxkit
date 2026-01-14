@@ -4,7 +4,12 @@
 
 pub mod item;
 pub mod provider;
+pub mod resolve;
+pub mod snippet;
 pub mod trigger;
+
+pub use resolve::{ResolvableCompletion, CompletionRanker, CompletionDeduplicator, ImportCompletion};
+pub use snippet::{Snippet, SnippetElement, SnippetTemplates};
 
 use std::collections::HashMap;
 use std::sync::Arc;

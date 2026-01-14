@@ -3,6 +3,10 @@
 //! This crate provides tools for analyzing package dependencies,
 //! detecting cycles, and understanding the structure of monorepos.
 
+pub mod build_order;
+
+pub use build_order::{BuildOrderComputer, BuildPlan, BuildStage, BuildNode, IncrementalBuild};
+
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use parking_lot::RwLock;

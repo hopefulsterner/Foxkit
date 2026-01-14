@@ -10,11 +10,14 @@
 //! - Impact analysis (what breaks if I change this?)
 //! - Workspace-aware code intelligence
 
+pub mod detection;
 pub mod detector;
 pub mod graph;
 pub mod impact;
 pub mod package;
 pub mod workspace_intel;
+
+pub use detection::{PackageDetector, MultiDetector, DetectedPackage, PackageManagerType, CargoDetector, NpmDetector};
 
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;

@@ -3,10 +3,11 @@
 //! AI is not a plugin in Foxkit - it's a core system layer.
 //! 
 //! This module provides:
-//! - Multi-provider LLM integration (OpenAI, Anthropic, Azure, Ollama)
+//! - Multi-provider LLM integration (OpenAI, Anthropic, Azure, Google, Ollama)
 //! - Monorepo-aware context building
 //! - Streaming completions
 //! - Tool/function calling
+//! - MCP (Model Context Protocol) support
 //! - Autonomous agent capabilities
 
 pub mod context;
@@ -14,6 +15,7 @@ pub mod providers;
 pub mod tools;
 pub mod agent;
 pub mod completion;
+pub mod mcp;
 
 use std::sync::Arc;
 use async_trait::async_trait;
@@ -22,10 +24,11 @@ use futures::Stream;
 use std::pin::Pin;
 
 pub use context::AiContext;
-pub use providers::{Provider, ProviderConfig};
-pub use tools::{Tool, ToolCall, ToolResult};
+pub use providers::{Provider, ProviderConfig, ProviderRegistry, ProviderType};
+pub use tools::{Tool, ToolCall, ToolResult, ToolSchema};
 pub use agent::{Agent, AgentMode};
 pub use completion::{CompletionRequest, CompletionResponse, StreamChunk};
+pub use mcp::{McpClient, McpRegistry, McpServerConfig, McpTool};
 
 /// AI Service - the main interface for AI capabilities
 pub struct AiService {
