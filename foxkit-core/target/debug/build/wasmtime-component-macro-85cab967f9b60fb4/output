@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=build.rs
+cargo:rustc-env=DEBUG_OUTPUT_DIR=/workspaces/Foxkit/foxkit-core/target/debug/build/wasmtime-component-macro-85cab967f9b60fb4/out

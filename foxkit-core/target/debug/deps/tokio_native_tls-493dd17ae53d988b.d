@@ -1,0 +1,5 @@
+/workspaces/Foxkit/foxkit-core/target/debug/deps/tokio_native_tls-493dd17ae53d988b.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-native-tls-0.3.1/src/lib.rs
+
+/workspaces/Foxkit/foxkit-core/target/debug/deps/libtokio_native_tls-493dd17ae53d988b.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-native-tls-0.3.1/src/lib.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-native-tls-0.3.1/src/lib.rs:

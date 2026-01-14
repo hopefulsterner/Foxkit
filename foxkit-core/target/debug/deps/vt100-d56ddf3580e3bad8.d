@@ -1,0 +1,12 @@
+/workspaces/Foxkit/foxkit-core/target/debug/deps/vt100-d56ddf3580e3bad8.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/attrs.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/cell.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/grid.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/parser.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/row.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/screen.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/term.rs
+
+/workspaces/Foxkit/foxkit-core/target/debug/deps/libvt100-d56ddf3580e3bad8.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/attrs.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/cell.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/grid.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/parser.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/row.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/screen.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/term.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/lib.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/attrs.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/cell.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/grid.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/parser.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/row.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/screen.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/vt100-0.15.2/src/term.rs:

@@ -1,0 +1,12 @@
+/workspaces/Foxkit/foxkit-core/target/debug/deps/seize-6a0adb43e0472ddf.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/collector.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/raw.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/mod.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/thread_id.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/utils.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/reclaim.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/../README.md
+
+/workspaces/Foxkit/foxkit-core/target/debug/deps/libseize-6a0adb43e0472ddf.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/collector.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/raw.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/mod.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/thread_id.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/utils.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/reclaim.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/../README.md
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/lib.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/collector.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/raw.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/mod.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/tls/thread_id.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/utils.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/reclaim.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/seize-0.3.3/src/../README.md:

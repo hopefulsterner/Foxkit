@@ -1,0 +1,10 @@
+/workspaces/Foxkit/foxkit-core/target/debug/deps/wasmtime_wit_bindgen-812b22a7b4640108.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/rust.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/source.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/types.rs
+
+/workspaces/Foxkit/foxkit-core/target/debug/deps/libwasmtime_wit_bindgen-812b22a7b4640108.rlib: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/rust.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/source.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/types.rs
+
+/workspaces/Foxkit/foxkit-core/target/debug/deps/libwasmtime_wit_bindgen-812b22a7b4640108.rmeta: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/lib.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/rust.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/source.rs /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/types.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/lib.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/rust.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/source.rs:
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmtime-wit-bindgen-28.0.1/src/types.rs:
