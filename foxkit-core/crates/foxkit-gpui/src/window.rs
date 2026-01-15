@@ -1,17 +1,19 @@
 //! Window management and event loop
 //!
 //! This module provides the main application window using winit and wgpu,
-//! with real text rendering using the GPU font system.
+//! with REAL interactive text editing like VS Code.
 
 use std::sync::Arc;
+use std::path::PathBuf;
+use std::fs;
 use anyhow::Result;
 use parking_lot::RwLock;
 use winit::{
     application::ApplicationHandler,
-    event::{WindowEvent, ElementState, KeyEvent},
+    event::{WindowEvent, ElementState, KeyEvent, MouseButton, MouseScrollDelta},
     event_loop::{ActiveEventLoop, EventLoop, ControlFlow},
     window::{Window, WindowId, WindowAttributes},
-    keyboard::{Key, NamedKey},
+    keyboard::{Key, NamedKey, ModifiersState},
     dpi::PhysicalSize,
 };
 use wgpu::*;
@@ -24,6 +26,47 @@ use gpu::{
 /// Application state
 pub struct App {
     state: Option<AppState>,
+}
+
+/// Editor mode (like Vim but simpler)
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum EditorMode {
+    Normal,
+    Insert,
+}
+
+/// Selection range
+#[derive(Clone, Copy, Debug)]
+pub struct Selection {
+    pub start_line: usize,
+    pub start_col: usize,
+    pub end_line: usize,
+    pub end_col: usize,
+}
+
+impl Selection {
+    pub fn is_empty(&self) -> bool {
+        self.start_line == self.end_line && self.start_col == self.end_col
+    }
+    
+    /// Get normalized selection (start before end)
+    pub fn normalized(&self) -> (usize, usize, usize, usize) {
+        if self.start_line < self.end_line || 
+           (self.start_line == self.end_line && self.start_col <= self.end_col) {
+            (self.start_line, self.start_col, self.end_line, self.end_col)
+        } else {
+            (self.end_line, self.end_col, self.start_line, self.start_col)
+        }
+    }
+}
+
+/// Undo/Redo action
+#[derive(Clone, Debug)]
+pub enum EditAction {
+    Insert { line: usize, col: usize, text: String },
+    Delete { line: usize, col: usize, text: String },
+    InsertLine { line: usize },
+    DeleteLine { line: usize, content: String },
 }
 
 /// Initialized app state (after window created)
@@ -39,7 +82,7 @@ struct AppState {
     text_renderer: IntegratedTextRenderer,
     font_key: FontKey,
     
-    // Editor state
+    // Editor state - REAL EDITING
     content: Vec<String>,
     cursor_line: usize,
     cursor_col: usize,
@@ -48,14 +91,45 @@ struct AppState {
     font_size: f32,
     char_width: f32,
     
+    // Editor mode
+    mode: EditorMode,
+    
+    // Selection
+    selection: Option<Selection>,
+    is_selecting: bool,
+    
+    // Clipboard
+    clipboard: String,
+    
+    // Undo/Redo
+    undo_stack: Vec<Vec<EditAction>>,
+    redo_stack: Vec<Vec<EditAction>>,
+    current_action_group: Vec<EditAction>,
+    
+    // File management
+    current_file: Option<PathBuf>,
+    is_modified: bool,
+    
+    // Keyboard modifiers
+    modifiers: ModifiersState,
+    
     // UI state
     show_file_explorer: bool,
     selected_file_index: usize,
-    files: Vec<String>,
+    files: Vec<(String, PathBuf, bool)>, // (display_name, path, is_dir)
+    current_dir: PathBuf,
     
     // Text vertex buffer for rendering
     text_vertex_buffer: Buffer,
     text_index_buffer: Buffer,
+    
+    // Cursor blink timer
+    cursor_visible: bool,
+    last_cursor_toggle: std::time::Instant,
+    
+    // Mouse state
+    mouse_x: f32,
+    mouse_y: f32,
 }
 
 impl App {
@@ -174,65 +248,12 @@ impl ApplicationHandler for App {
             mapped_at_creation: false,
         });
 
-        // Sample content to display
-        let content = vec![
-            "// 🦊 Welcome to Foxkit IDE!".to_string(),
-            "//".to_string(),
-            "// A next-generation monorepo development platform".to_string(),
-            "// DNA: Theia (Cloud/Extensions) × Zed (Performance/Collaboration)".to_string(),
-            "".to_string(),
-            "fn main() {".to_string(),
-            "    println!(\"Hello, Foxkit!\");".to_string(),
-            "".to_string(),
-            "    // GPU-accelerated text rendering".to_string(),
-            "    let renderer = TextRenderer::new();".to_string(),
-            "".to_string(),
-            "    // Real font rendering with fontdue".to_string(),
-            "    let font = FontSystem::load(\"DejaVu Sans Mono\");".to_string(),
-            "".to_string(),
-            "    // File explorer sidebar".to_string(),
-            "    let explorer = FileExplorer::new();".to_string(),
-            "".to_string(),
-            "    // Tab management".to_string(),
-            "    let tabs = TabBar::new();".to_string(),
-            "}".to_string(),
-            "".to_string(),
-            "struct Editor {".to_string(),
-            "    content: Vec<String>,".to_string(),
-            "    cursor: Position,".to_string(),
-            "    scroll: ScrollState,".to_string(),
-            "}".to_string(),
-            "".to_string(),
-            "impl Editor {".to_string(),
-            "    fn render(&self, scene: &mut Scene) {".to_string(),
-            "        // Render editor content".to_string(),
-            "        for (i, line) in self.content.iter().enumerate() {".to_string(),
-            "            scene.draw_text(line, Point::new(60.0, i as f32 * 20.0));".to_string(),
-            "        }".to_string(),
-            "    }".to_string(),
-            "}".to_string(),
-            "".to_string(),
-            "// Press arrow keys to move cursor".to_string(),
-            "// Press Page Up/Down to scroll".to_string(),
-            "// Press Tab to toggle file explorer".to_string(),
-            "// Press Escape to quit".to_string(),
-        ];
-
-        // Sample file list
-        let files = vec![
-            "📁 src".to_string(),
-            "  📄 main.rs".to_string(),
-            "  📄 lib.rs".to_string(),
-            "  📁 editor".to_string(),
-            "    📄 mod.rs".to_string(),
-            "    📄 buffer.rs".to_string(),
-            "    📄 cursor.rs".to_string(),
-            "  📁 ui".to_string(),
-            "    📄 mod.rs".to_string(),
-            "    📄 window.rs".to_string(),
-            "📄 Cargo.toml".to_string(),
-            "📄 README.md".to_string(),
-        ];
+        // Try to load a real file, fall back to welcome content
+        let (content, current_file) = load_initial_file();
+        
+        // Get current directory for file explorer
+        let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        let files = scan_directory(&current_dir);
 
         let font_size = 14.0;
         let line_height = font_size * 1.5;
@@ -254,16 +275,31 @@ impl ApplicationHandler for App {
             line_height,
             font_size,
             char_width,
+            mode: EditorMode::Insert, // Start in insert mode for easy editing
+            selection: None,
+            is_selecting: false,
+            clipboard: String::new(),
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
+            current_action_group: Vec::new(),
+            current_file,
+            is_modified: false,
+            modifiers: ModifiersState::empty(),
             show_file_explorer: true,
             selected_file_index: 0,
             files,
+            current_dir,
             text_vertex_buffer,
             text_index_buffer,
+            cursor_visible: true,
+            last_cursor_toggle: std::time::Instant::now(),
+            mouse_x: 0.0,
+            mouse_y: 0.0,
         });
 
-        tracing::info!("🦊 Foxkit window created with text rendering!");
+        tracing::info!("🦊 Foxkit - Real Interactive Editor Ready!");
     }
-
+    
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
         let Some(state) = &mut self.state else { return };
 
@@ -283,72 +319,73 @@ impl ApplicationHandler for App {
                 }
             }
 
+            WindowEvent::ModifiersChanged(mods) => {
+                state.modifiers = mods.state();
+            }
+
+            WindowEvent::MouseInput { state: button_state, button, .. } => {
+                if button == MouseButton::Left {
+                    if button_state == ElementState::Pressed {
+                        state.is_selecting = true;
+                        // Position cursor at click position
+                        state.position_cursor_at_mouse();
+                        state.selection = Some(Selection {
+                            start_line: state.cursor_line,
+                            start_col: state.cursor_col,
+                            end_line: state.cursor_line,
+                            end_col: state.cursor_col,
+                        });
+                    } else {
+                        state.is_selecting = false;
+                        // Clear selection if it's empty
+                        if let Some(sel) = &state.selection {
+                            if sel.is_empty() {
+                                state.selection = None;
+                            }
+                        }
+                    }
+                    state.window.request_redraw();
+                }
+            }
+
+            WindowEvent::CursorMoved { position, .. } => {
+                state.mouse_x = position.x as f32;
+                state.mouse_y = position.y as f32;
+                
+                if state.is_selecting {
+                    state.position_cursor_at_mouse();
+                    if let Some(ref mut sel) = state.selection {
+                        sel.end_line = state.cursor_line;
+                        sel.end_col = state.cursor_col;
+                    }
+                    state.window.request_redraw();
+                }
+            }
+
+            WindowEvent::MouseWheel { delta, .. } => {
+                let scroll_amount = match delta {
+                    MouseScrollDelta::LineDelta(_, y) => y * state.line_height * 3.0,
+                    MouseScrollDelta::PixelDelta(pos) => pos.y as f32,
+                };
+                
+                let max_scroll = (state.content.len() as f32 * state.line_height - state.config.height as f32 + 100.0).max(0.0);
+                state.scroll_offset = (state.scroll_offset - scroll_amount).clamp(0.0, max_scroll);
+                state.window.request_redraw();
+            }
+
             WindowEvent::KeyboardInput { event: KeyEvent { logical_key, state: key_state, .. }, .. } => {
                 if key_state == ElementState::Pressed {
-                    match logical_key {
-                        Key::Named(NamedKey::Escape) => {
-                            event_loop.exit();
-                        }
-                        Key::Named(NamedKey::Tab) => {
-                            state.show_file_explorer = !state.show_file_explorer;
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::ArrowUp) => {
-                            if state.cursor_line > 0 {
-                                state.cursor_line -= 1;
-                                state.ensure_cursor_visible();
-                            }
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::ArrowDown) => {
-                            if state.cursor_line < state.content.len().saturating_sub(1) {
-                                state.cursor_line += 1;
-                                state.ensure_cursor_visible();
-                            }
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::ArrowLeft) => {
-                            if state.cursor_col > 0 {
-                                state.cursor_col -= 1;
-                            }
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::ArrowRight) => {
-                            let line_len = state.content.get(state.cursor_line)
-                                .map(|l| l.chars().count())
-                                .unwrap_or(0);
-                            if state.cursor_col < line_len {
-                                state.cursor_col += 1;
-                            }
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::PageUp) => {
-                            let lines_per_page = (state.config.height as f32 / state.line_height) as usize;
-                            state.scroll_offset = (state.scroll_offset - lines_per_page as f32 * state.line_height).max(0.0);
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::PageDown) => {
-                            let max_scroll = (state.content.len() as f32 * state.line_height - state.config.height as f32).max(0.0);
-                            let lines_per_page = (state.config.height as f32 / state.line_height) as usize;
-                            state.scroll_offset = (state.scroll_offset + lines_per_page as f32 * state.line_height).min(max_scroll);
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::Home) => {
-                            state.cursor_col = 0;
-                            state.window.request_redraw();
-                        }
-                        Key::Named(NamedKey::End) => {
-                            state.cursor_col = state.content.get(state.cursor_line)
-                                .map(|l| l.chars().count())
-                                .unwrap_or(0);
-                            state.window.request_redraw();
-                        }
-                        _ => {}
-                    }
+                    state.handle_key_press(&logical_key, event_loop);
                 }
             }
 
             WindowEvent::RedrawRequested => {
+                // Blink cursor
+                let now = std::time::Instant::now();
+                if now.duration_since(state.last_cursor_toggle).as_millis() > 500 {
+                    state.cursor_visible = !state.cursor_visible;
+                    state.last_cursor_toggle = now;
+                }
                 state.render();
             }
 
@@ -363,6 +400,103 @@ impl ApplicationHandler for App {
     }
 }
 
+/// Load initial file - try Cargo.toml, README.md, or create welcome content
+fn load_initial_file() -> (Vec<String>, Option<PathBuf>) {
+    let candidates = [
+        "Cargo.toml",
+        "README.md",
+        "src/main.rs",
+        "src/lib.rs",
+    ];
+    
+    for candidate in candidates {
+        let path = PathBuf::from(candidate);
+        if path.exists() {
+            if let Ok(content) = fs::read_to_string(&path) {
+                let lines: Vec<String> = content.lines().map(String::from).collect();
+                tracing::info!("📄 Loaded file: {}", candidate);
+                return (if lines.is_empty() { vec![String::new()] } else { lines }, Some(path));
+            }
+        }
+    }
+    
+    // Default welcome content
+    let content = vec![
+        "// 🦊 Welcome to Foxkit IDE!".to_string(),
+        "//".to_string(),
+        "// This is a REAL interactive editor - start typing!".to_string(),
+        "//".to_string(),
+        "// Keyboard shortcuts:".to_string(),
+        "//   Ctrl+S  - Save file".to_string(),
+        "//   Ctrl+O  - Open file".to_string(),
+        "//   Ctrl+N  - New file".to_string(),
+        "//   Ctrl+Z  - Undo".to_string(),
+        "//   Ctrl+Y  - Redo".to_string(),
+        "//   Ctrl+C  - Copy".to_string(),
+        "//   Ctrl+V  - Paste".to_string(),
+        "//   Ctrl+X  - Cut".to_string(),
+        "//   Ctrl+A  - Select all".to_string(),
+        "//   Tab     - Toggle file explorer".to_string(),
+        "//   Escape  - Exit (or switch to Normal mode)".to_string(),
+        "".to_string(),
+        "fn main() {".to_string(),
+        "    // Start typing here...".to_string(),
+        "    println!(\"Hello from Foxkit!\");".to_string(),
+        "}".to_string(),
+    ];
+    (content, None)
+}
+
+/// Scan directory for file explorer
+fn scan_directory(dir: &PathBuf) -> Vec<(String, PathBuf, bool)> {
+    let mut entries = Vec::new();
+    
+    if let Ok(read_dir) = fs::read_dir(dir) {
+        let mut items: Vec<_> = read_dir
+            .filter_map(|e| e.ok())
+            .map(|e| {
+                let path = e.path();
+                let is_dir = path.is_dir();
+                let name = e.file_name().to_string_lossy().to_string();
+                (name, path, is_dir)
+            })
+            .filter(|(name, _, _)| !name.starts_with('.') && name != "target" && name != "node_modules")
+            .collect();
+        
+        // Sort: directories first, then alphabetically
+        items.sort_by(|a, b| {
+            match (a.2, b.2) {
+                (true, false) => std::cmp::Ordering::Less,
+                (false, true) => std::cmp::Ordering::Greater,
+                _ => a.0.to_lowercase().cmp(&b.0.to_lowercase()),
+            }
+        });
+        
+        for (name, path, is_dir) in items {
+            let display = if is_dir {
+                format!("📁 {}", name)
+            } else {
+                let icon = match path.extension().and_then(|e| e.to_str()) {
+                    Some("rs") => "🦀",
+                    Some("toml") => "⚙️",
+                    Some("md") => "📝",
+                    Some("json") => "📋",
+                    Some("ts" | "tsx") => "📘",
+                    Some("js" | "jsx") => "📙",
+                    Some("py") => "🐍",
+                    Some("html") => "🌐",
+                    Some("css") => "🎨",
+                    _ => "📄",
+                };
+                format!("{} {}", icon, name)
+            };
+            entries.push((display, path, is_dir));
+        }
+    }
+    
+    entries
+}
+
 impl AppState {
     fn ensure_cursor_visible(&mut self) {
         let title_height = 35.0;
@@ -375,6 +509,621 @@ impl AppState {
         if cursor_y + self.line_height > self.scroll_offset + viewport_height + title_height {
             self.scroll_offset = cursor_y + self.line_height - viewport_height - title_height;
         }
+    }
+    
+    /// Position cursor based on mouse click
+    fn position_cursor_at_mouse(&mut self) {
+        let explorer_width = if self.show_file_explorer { 200.0 } else { 0.0 };
+        let gutter_width = 50.0;
+        let title_height = 35.0;
+        let tab_height = 30.0;
+        
+        let editor_x = explorer_width + gutter_width + 10.0;
+        let editor_y = title_height + tab_height;
+        
+        // Check if click is in editor area
+        if self.mouse_x >= editor_x && self.mouse_y >= editor_y {
+            let rel_y = self.mouse_y - editor_y + self.scroll_offset;
+            let rel_x = self.mouse_x - editor_x;
+            
+            let line = (rel_y / self.line_height) as usize;
+            let col = (rel_x / self.char_width) as usize;
+            
+            self.cursor_line = line.min(self.content.len().saturating_sub(1));
+            let line_len = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+            self.cursor_col = col.min(line_len);
+            
+            // Reset cursor blink on click
+            self.cursor_visible = true;
+            self.last_cursor_toggle = std::time::Instant::now();
+        }
+    }
+    
+    /// Handle keyboard input - REAL TEXT EDITING
+    fn handle_key_press(&mut self, key: &Key, event_loop: &ActiveEventLoop) {
+        let ctrl = self.modifiers.control_key();
+        let shift = self.modifiers.shift_key();
+        
+        // Reset cursor blink on any key
+        self.cursor_visible = true;
+        self.last_cursor_toggle = std::time::Instant::now();
+        
+        match key {
+            // === CONTROL KEY SHORTCUTS ===
+            _ if ctrl => {
+                match key {
+                    Key::Character(c) if c.as_str() == "s" => {
+                        self.save_file();
+                    }
+                    Key::Character(c) if c.as_str() == "o" => {
+                        // Open file (simplified - open first file in explorer)
+                        if !self.files.is_empty() {
+                            let (_, path, is_dir) = &self.files[self.selected_file_index];
+                            if !is_dir {
+                                self.open_file(path.clone());
+                            }
+                        }
+                    }
+                    Key::Character(c) if c.as_str() == "n" => {
+                        self.new_file();
+                    }
+                    Key::Character(c) if c.as_str() == "z" => {
+                        self.undo();
+                    }
+                    Key::Character(c) if c.as_str() == "y" => {
+                        self.redo();
+                    }
+                    Key::Character(c) if c.as_str() == "c" => {
+                        self.copy();
+                    }
+                    Key::Character(c) if c.as_str() == "v" => {
+                        self.paste();
+                    }
+                    Key::Character(c) if c.as_str() == "x" => {
+                        self.cut();
+                    }
+                    Key::Character(c) if c.as_str() == "a" => {
+                        self.select_all();
+                    }
+                    Key::Named(NamedKey::Home) => {
+                        // Go to start of document
+                        self.cursor_line = 0;
+                        self.cursor_col = 0;
+                        self.scroll_offset = 0.0;
+                    }
+                    Key::Named(NamedKey::End) => {
+                        // Go to end of document
+                        self.cursor_line = self.content.len().saturating_sub(1);
+                        self.cursor_col = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+                        self.ensure_cursor_visible();
+                    }
+                    _ => {}
+                }
+            }
+            
+            // === NAMED KEYS ===
+            Key::Named(NamedKey::Escape) => {
+                if self.mode == EditorMode::Insert {
+                    self.mode = EditorMode::Normal;
+                } else {
+                    event_loop.exit();
+                }
+            }
+            
+            Key::Named(NamedKey::Tab) if !ctrl => {
+                if shift {
+                    // Toggle file explorer
+                    self.show_file_explorer = !self.show_file_explorer;
+                } else {
+                    // Insert tab (4 spaces)
+                    self.insert_text("    ");
+                }
+            }
+            
+            Key::Named(NamedKey::Enter) => {
+                self.insert_newline();
+            }
+            
+            Key::Named(NamedKey::Backspace) => {
+                self.backspace();
+            }
+            
+            Key::Named(NamedKey::Delete) => {
+                self.delete();
+            }
+            
+            Key::Named(NamedKey::ArrowUp) => {
+                self.clear_selection_if_not_shift(shift);
+                if self.cursor_line > 0 {
+                    self.cursor_line -= 1;
+                    self.clamp_cursor_col();
+                }
+                if shift { self.extend_selection(); }
+                self.ensure_cursor_visible();
+            }
+            
+            Key::Named(NamedKey::ArrowDown) => {
+                self.clear_selection_if_not_shift(shift);
+                if self.cursor_line < self.content.len().saturating_sub(1) {
+                    self.cursor_line += 1;
+                    self.clamp_cursor_col();
+                }
+                if shift { self.extend_selection(); }
+                self.ensure_cursor_visible();
+            }
+            
+            Key::Named(NamedKey::ArrowLeft) => {
+                self.clear_selection_if_not_shift(shift);
+                if self.cursor_col > 0 {
+                    self.cursor_col -= 1;
+                } else if self.cursor_line > 0 {
+                    self.cursor_line -= 1;
+                    self.cursor_col = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+                }
+                if shift { self.extend_selection(); }
+            }
+            
+            Key::Named(NamedKey::ArrowRight) => {
+                self.clear_selection_if_not_shift(shift);
+                let line_len = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+                if self.cursor_col < line_len {
+                    self.cursor_col += 1;
+                } else if self.cursor_line < self.content.len().saturating_sub(1) {
+                    self.cursor_line += 1;
+                    self.cursor_col = 0;
+                }
+                if shift { self.extend_selection(); }
+            }
+            
+            Key::Named(NamedKey::Home) => {
+                self.clear_selection_if_not_shift(shift);
+                self.cursor_col = 0;
+                if shift { self.extend_selection(); }
+            }
+            
+            Key::Named(NamedKey::End) => {
+                self.clear_selection_if_not_shift(shift);
+                self.cursor_col = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+                if shift { self.extend_selection(); }
+            }
+            
+            Key::Named(NamedKey::PageUp) => {
+                let lines_per_page = (self.config.height as f32 / self.line_height) as usize;
+                self.cursor_line = self.cursor_line.saturating_sub(lines_per_page);
+                self.scroll_offset = (self.scroll_offset - lines_per_page as f32 * self.line_height).max(0.0);
+                self.clamp_cursor_col();
+            }
+            
+            Key::Named(NamedKey::PageDown) => {
+                let lines_per_page = (self.config.height as f32 / self.line_height) as usize;
+                self.cursor_line = (self.cursor_line + lines_per_page).min(self.content.len().saturating_sub(1));
+                let max_scroll = (self.content.len() as f32 * self.line_height - self.config.height as f32).max(0.0);
+                self.scroll_offset = (self.scroll_offset + lines_per_page as f32 * self.line_height).min(max_scroll);
+                self.clamp_cursor_col();
+            }
+            
+            // === CHARACTER INPUT ===
+            Key::Character(c) => {
+                // Insert the typed character
+                self.insert_text(c.as_str());
+            }
+            
+            Key::Named(NamedKey::Space) => {
+                self.insert_text(" ");
+            }
+            
+            _ => {}
+        }
+        
+        self.window.request_redraw();
+    }
+    
+    /// Clamp cursor column to line length
+    fn clamp_cursor_col(&mut self) {
+        let line_len = self.content.get(self.cursor_line).map(|l| l.chars().count()).unwrap_or(0);
+        self.cursor_col = self.cursor_col.min(line_len);
+    }
+    
+    /// Insert text at cursor position - REAL EDITING
+    fn insert_text(&mut self, text: &str) {
+        // Delete selection first if any
+        self.delete_selection();
+        
+        if self.content.is_empty() {
+            self.content.push(String::new());
+        }
+        
+        let line = &mut self.content[self.cursor_line];
+        
+        // Convert cursor_col to byte index
+        let byte_idx: usize = line.chars().take(self.cursor_col).map(|c| c.len_utf8()).sum();
+        
+        // Insert text
+        line.insert_str(byte_idx, text);
+        self.cursor_col += text.chars().count();
+        
+        self.is_modified = true;
+        
+        // Record for undo
+        self.current_action_group.push(EditAction::Insert {
+            line: self.cursor_line,
+            col: self.cursor_col - text.chars().count(),
+            text: text.to_string(),
+        });
+    }
+    
+    /// Insert a new line at cursor position
+    fn insert_newline(&mut self) {
+        self.delete_selection();
+        
+        if self.content.is_empty() {
+            self.content.push(String::new());
+        }
+        
+        let line = &self.content[self.cursor_line];
+        let byte_idx: usize = line.chars().take(self.cursor_col).map(|c| c.len_utf8()).sum();
+        
+        // Get indentation from current line
+        let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
+        
+        // Split line
+        let rest = line[byte_idx..].to_string();
+        self.content[self.cursor_line].truncate(byte_idx);
+        
+        // Insert new line with indentation
+        self.cursor_line += 1;
+        self.content.insert(self.cursor_line, format!("{}{}", indent, rest));
+        self.cursor_col = indent.chars().count();
+        
+        self.is_modified = true;
+        self.ensure_cursor_visible();
+        
+        self.current_action_group.push(EditAction::InsertLine { line: self.cursor_line });
+    }
+    
+    /// Delete character before cursor (backspace)
+    fn backspace(&mut self) {
+        // If there's a selection, delete it
+        if self.selection.is_some() && !self.selection.as_ref().unwrap().is_empty() {
+            self.delete_selection();
+            return;
+        }
+        
+        if self.content.is_empty() {
+            return;
+        }
+        
+        if self.cursor_col > 0 {
+            // Delete character in current line
+            let line = &mut self.content[self.cursor_line];
+            let byte_idx: usize = line.chars().take(self.cursor_col).map(|c| c.len_utf8()).sum();
+            let prev_char_len = line[..byte_idx].chars().last().map(|c| c.len_utf8()).unwrap_or(0);
+            let deleted = line[byte_idx - prev_char_len..byte_idx].to_string();
+            line.replace_range(byte_idx - prev_char_len..byte_idx, "");
+            self.cursor_col -= 1;
+            
+            self.current_action_group.push(EditAction::Delete {
+                line: self.cursor_line,
+                col: self.cursor_col,
+                text: deleted,
+            });
+        } else if self.cursor_line > 0 {
+            // Join with previous line
+            let current_line = self.content.remove(self.cursor_line);
+            self.cursor_line -= 1;
+            self.cursor_col = self.content[self.cursor_line].chars().count();
+            self.content[self.cursor_line].push_str(&current_line);
+            
+            self.current_action_group.push(EditAction::DeleteLine {
+                line: self.cursor_line + 1,
+                content: current_line,
+            });
+        }
+        
+        self.is_modified = true;
+        self.ensure_cursor_visible();
+    }
+    
+    /// Delete character at cursor (delete key)
+    fn delete(&mut self) {
+        // If there's a selection, delete it
+        if self.selection.is_some() && !self.selection.as_ref().unwrap().is_empty() {
+            self.delete_selection();
+            return;
+        }
+        
+        if self.content.is_empty() {
+            return;
+        }
+        
+        let line_len = self.content[self.cursor_line].chars().count();
+        
+        if self.cursor_col < line_len {
+            // Delete character in current line
+            let line = &mut self.content[self.cursor_line];
+            let byte_idx: usize = line.chars().take(self.cursor_col).map(|c| c.len_utf8()).sum();
+            let next_char_len = line[byte_idx..].chars().next().map(|c| c.len_utf8()).unwrap_or(0);
+            let deleted = line[byte_idx..byte_idx + next_char_len].to_string();
+            line.replace_range(byte_idx..byte_idx + next_char_len, "");
+            
+            self.current_action_group.push(EditAction::Delete {
+                line: self.cursor_line,
+                col: self.cursor_col,
+                text: deleted,
+            });
+        } else if self.cursor_line < self.content.len() - 1 {
+            // Join with next line
+            let next_line = self.content.remove(self.cursor_line + 1);
+            self.content[self.cursor_line].push_str(&next_line);
+            
+            self.current_action_group.push(EditAction::DeleteLine {
+                line: self.cursor_line + 1,
+                content: next_line,
+            });
+        }
+        
+        self.is_modified = true;
+    }
+    
+    /// Delete selected text
+    fn delete_selection(&mut self) {
+        let Some(sel) = self.selection.take() else { return };
+        if sel.is_empty() { return; }
+        
+        let (start_line, start_col, end_line, end_col) = sel.normalized();
+        
+        if start_line == end_line {
+            // Single line selection
+            let line = &mut self.content[start_line];
+            let start_byte: usize = line.chars().take(start_col).map(|c| c.len_utf8()).sum();
+            let end_byte: usize = line.chars().take(end_col).map(|c| c.len_utf8()).sum();
+            line.replace_range(start_byte..end_byte, "");
+        } else {
+            // Multi-line selection
+            let first_line_start: usize = self.content[start_line].chars().take(start_col).map(|c| c.len_utf8()).sum();
+            let last_line_end: usize = self.content[end_line].chars().take(end_col).map(|c| c.len_utf8()).sum();
+            
+            let remaining = self.content[end_line][last_line_end..].to_string();
+            self.content[start_line].truncate(first_line_start);
+            self.content[start_line].push_str(&remaining);
+            
+            // Remove middle lines
+            for _ in start_line + 1..=end_line {
+                self.content.remove(start_line + 1);
+            }
+        }
+        
+        self.cursor_line = start_line;
+        self.cursor_col = start_col;
+        self.is_modified = true;
+    }
+    
+    fn clear_selection_if_not_shift(&mut self, shift: bool) {
+        if !shift {
+            self.selection = None;
+        } else if self.selection.is_none() {
+            self.selection = Some(Selection {
+                start_line: self.cursor_line,
+                start_col: self.cursor_col,
+                end_line: self.cursor_line,
+                end_col: self.cursor_col,
+            });
+        }
+    }
+    
+    fn extend_selection(&mut self) {
+        if let Some(ref mut sel) = self.selection {
+            sel.end_line = self.cursor_line;
+            sel.end_col = self.cursor_col;
+        }
+    }
+    
+    fn select_all(&mut self) {
+        self.selection = Some(Selection {
+            start_line: 0,
+            start_col: 0,
+            end_line: self.content.len().saturating_sub(1),
+            end_col: self.content.last().map(|l| l.chars().count()).unwrap_or(0),
+        });
+        self.cursor_line = self.content.len().saturating_sub(1);
+        self.cursor_col = self.content.last().map(|l| l.chars().count()).unwrap_or(0);
+    }
+    
+    fn copy(&mut self) {
+        let Some(sel) = &self.selection else { return };
+        if sel.is_empty() { return; }
+        
+        let (start_line, start_col, end_line, end_col) = sel.normalized();
+        
+        if start_line == end_line {
+            let line = &self.content[start_line];
+            let start_byte: usize = line.chars().take(start_col).map(|c| c.len_utf8()).sum();
+            let end_byte: usize = line.chars().take(end_col).map(|c| c.len_utf8()).sum();
+            self.clipboard = line[start_byte..end_byte].to_string();
+        } else {
+            let mut result = String::new();
+            for line_idx in start_line..=end_line {
+                let line = &self.content[line_idx];
+                if line_idx == start_line {
+                    let start_byte: usize = line.chars().take(start_col).map(|c| c.len_utf8()).sum();
+                    result.push_str(&line[start_byte..]);
+                } else if line_idx == end_line {
+                    let end_byte: usize = line.chars().take(end_col).map(|c| c.len_utf8()).sum();
+                    result.push('\n');
+                    result.push_str(&line[..end_byte]);
+                } else {
+                    result.push('\n');
+                    result.push_str(line);
+                }
+            }
+            self.clipboard = result;
+        }
+    }
+    
+    fn paste(&mut self) {
+        if self.clipboard.is_empty() { return; }
+        
+        self.delete_selection();
+        
+        // Clone clipboard to avoid borrow issues
+        let clipboard_content = self.clipboard.clone();
+        let lines: Vec<&str> = clipboard_content.split('\n').collect();
+        
+        if lines.len() == 1 {
+            self.insert_text(&clipboard_content);
+        } else {
+            for (i, line_text) in lines.iter().enumerate() {
+                if i > 0 {
+                    self.insert_newline();
+                }
+                if !line_text.is_empty() {
+                    self.insert_text(line_text);
+                }
+            }
+        }
+    }
+    
+    fn cut(&mut self) {
+        self.copy();
+        self.delete_selection();
+    }
+    
+    fn undo(&mut self) {
+        // Commit current action group
+        if !self.current_action_group.is_empty() {
+            self.undo_stack.push(std::mem::take(&mut self.current_action_group));
+        }
+        
+        let Some(actions) = self.undo_stack.pop() else { return };
+        
+        for action in actions.iter().rev() {
+            match action {
+                EditAction::Insert { line, col, text } => {
+                    let l = &mut self.content[*line];
+                    let start_byte: usize = l.chars().take(*col).map(|c| c.len_utf8()).sum();
+                    let end_byte: usize = l.chars().take(*col + text.chars().count()).map(|c| c.len_utf8()).sum();
+                    l.replace_range(start_byte..end_byte, "");
+                    self.cursor_line = *line;
+                    self.cursor_col = *col;
+                }
+                EditAction::Delete { line, col, text } => {
+                    let l = &mut self.content[*line];
+                    let byte_idx: usize = l.chars().take(*col).map(|c| c.len_utf8()).sum();
+                    l.insert_str(byte_idx, text);
+                    self.cursor_line = *line;
+                    self.cursor_col = *col + text.chars().count();
+                }
+                EditAction::InsertLine { line } => {
+                    if *line > 0 {
+                        let removed = self.content.remove(*line);
+                        self.content[*line - 1].push_str(&removed);
+                    }
+                    self.cursor_line = line.saturating_sub(1);
+                }
+                EditAction::DeleteLine { line, content } => {
+                    self.content.insert(*line, content.clone());
+                }
+            }
+        }
+        
+        self.redo_stack.push(actions);
+        self.ensure_cursor_visible();
+    }
+    
+    fn redo(&mut self) {
+        let Some(actions) = self.redo_stack.pop() else { return };
+        
+        for action in &actions {
+            match action {
+                EditAction::Insert { line, col, text } => {
+                    let l = &mut self.content[*line];
+                    let byte_idx: usize = l.chars().take(*col).map(|c| c.len_utf8()).sum();
+                    l.insert_str(byte_idx, text);
+                    self.cursor_line = *line;
+                    self.cursor_col = *col + text.chars().count();
+                }
+                EditAction::Delete { line, col, text } => {
+                    let l = &mut self.content[*line];
+                    let start_byte: usize = l.chars().take(*col).map(|c| c.len_utf8()).sum();
+                    let end_byte: usize = l.chars().take(*col + text.chars().count()).map(|c| c.len_utf8()).sum();
+                    l.replace_range(start_byte..end_byte, "");
+                    self.cursor_line = *line;
+                    self.cursor_col = *col;
+                }
+                EditAction::InsertLine { line } => {
+                    self.content.insert(*line, String::new());
+                }
+                EditAction::DeleteLine { line, .. } => {
+                    self.content.remove(*line);
+                }
+            }
+        }
+        
+        self.undo_stack.push(actions);
+        self.ensure_cursor_visible();
+    }
+    
+    /// Save file to disk
+    fn save_file(&mut self) {
+        // Commit current actions for undo
+        if !self.current_action_group.is_empty() {
+            self.undo_stack.push(std::mem::take(&mut self.current_action_group));
+        }
+        
+        let path = self.current_file.clone().unwrap_or_else(|| {
+            // Default save path
+            PathBuf::from("untitled.txt")
+        });
+        
+        let content = self.content.join("\n");
+        match fs::write(&path, &content) {
+            Ok(_) => {
+                self.current_file = Some(path.clone());
+                self.is_modified = false;
+                tracing::info!("💾 Saved: {}", path.display());
+            }
+            Err(e) => {
+                tracing::error!("❌ Failed to save: {}", e);
+            }
+        }
+    }
+    
+    /// Open a file
+    fn open_file(&mut self, path: PathBuf) {
+        match fs::read_to_string(&path) {
+            Ok(content) => {
+                self.content = content.lines().map(String::from).collect();
+                if self.content.is_empty() {
+                    self.content.push(String::new());
+                }
+                self.current_file = Some(path.clone());
+                self.cursor_line = 0;
+                self.cursor_col = 0;
+                self.scroll_offset = 0.0;
+                self.is_modified = false;
+                self.undo_stack.clear();
+                self.redo_stack.clear();
+                self.selection = None;
+                tracing::info!("📂 Opened: {}", path.display());
+            }
+            Err(e) => {
+                tracing::error!("❌ Failed to open: {}", e);
+            }
+        }
+    }
+    
+    /// Create new file
+    fn new_file(&mut self) {
+        self.content = vec![String::new()];
+        self.current_file = None;
+        self.cursor_line = 0;
+        self.cursor_col = 0;
+        self.scroll_offset = 0.0;
+        self.is_modified = false;
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.selection = None;
+        tracing::info!("📄 New file created");
     }
 
     fn render(&mut self) {
@@ -479,8 +1228,12 @@ impl AppState {
         all_glyphs.extend(title_glyphs);
 
         // File path in title
+        let file_display = self.current_file.as_ref()
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|| "untitled".to_string());
+        let modified_mark = if self.is_modified { " •" } else { "" };
         let path_glyphs = self.text_renderer.layout_text(
-            "main.rs - foxkit/src",
+            &format!("{}{}", file_display, modified_mark),
             Point { x: 120.0, y: 22.0 },
             &self.font_key,
             self.font_size - 2.0,
@@ -488,9 +1241,14 @@ impl AppState {
         );
         all_glyphs.extend(path_glyphs);
 
-        // Tab text
+        // Tab text - show actual filename
+        let tab_name = self.current_file.as_ref()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .unwrap_or("untitled");
+        let tab_text = format!("{}{}", tab_name, if self.is_modified { " •" } else { "" });
         let tab_glyphs = self.text_renderer.layout_text(
-            "main.rs",
+            &tab_text,
             Point { x: explorer_width + 15.0, y: title_height + 20.0 },
             &self.font_key,
             self.font_size - 1.0,
@@ -509,7 +1267,7 @@ impl AppState {
             );
             all_glyphs.extend(explorer_header);
 
-            for (i, file) in self.files.iter().enumerate() {
+            for (i, (display_name, _path, _is_dir)) in self.files.iter().enumerate() {
                 let y = title_height + 40.0 + i as f32 * 22.0;
                 if y > height - status_height {
                     break;
@@ -520,7 +1278,7 @@ impl AppState {
                     Color { r: 0.7, g: 0.7, b: 0.75, a: 1.0 }
                 };
                 let file_glyphs = self.text_renderer.layout_text(
-                    file,
+                    display_name,
                     Point { x: 10.0, y },
                     &self.font_key,
                     self.font_size - 1.0,
@@ -573,28 +1331,38 @@ impl AppState {
         }
 
         // Status bar text
+        let modified_indicator = if self.is_modified { " [Modified]" } else { "" };
+        let file_name = self.current_file.as_ref()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .unwrap_or("untitled");
         let status_text = format!(
-            "Ln {}, Col {}  |  UTF-8  |  Rust  |  {} lines",
+            "Ln {}, Col {}  |  UTF-8  |  Rust  |  {} lines{}",
             self.cursor_line + 1,
             self.cursor_col + 1,
-            self.content.len()
+            self.content.len(),
+            modified_indicator
         );
         let status_glyphs = self.text_renderer.layout_text(
             &status_text,
-            Point { x: width - 300.0, y: height - 8.0 },
+            Point { x: width - 350.0, y: height - 8.0 },
             &self.font_key,
             self.font_size - 2.0,
             Color { r: 0.6, g: 0.6, b: 0.65, a: 1.0 },
         );
         all_glyphs.extend(status_glyphs);
 
-        // Mode indicator
+        // Mode indicator with color
+        let (mode_text, mode_color) = match self.mode {
+            EditorMode::Normal => ("NORMAL", Color { r: 0.4, g: 0.6, b: 0.9, a: 1.0 }),
+            EditorMode::Insert => ("INSERT", Color { r: 0.4, g: 0.8, b: 0.4, a: 1.0 }),
+        };
         let mode_glyphs = self.text_renderer.layout_text(
-            "NORMAL",
+            mode_text,
             Point { x: 10.0, y: height - 8.0 },
             &self.font_key,
             self.font_size - 2.0,
-            Color { r: 0.4, g: 0.7, b: 0.4, a: 1.0 },
+            mode_color,
         );
         all_glyphs.extend(mode_glyphs);
 
@@ -786,6 +1554,7 @@ impl AppState {
             let cursor_y = editor_y + relative_line as f32 * self.line_height - (self.scroll_offset % self.line_height);
             
             if cursor_y >= editor_y && cursor_y < height - status_height {
+                // Current line highlight
                 scene.add(Primitive::Quad {
                     rect: Rect {
                         origin: Point { x: explorer_width + gutter_width, y: cursor_y },
@@ -795,16 +1564,51 @@ impl AppState {
                     corner_radius: 0.0,
                 });
 
-                // Cursor
-                let cursor_x = explorer_width + gutter_width + 10.0 + self.cursor_col as f32 * self.char_width;
-                scene.add(Primitive::Quad {
-                    rect: Rect {
-                        origin: Point { x: cursor_x, y: cursor_y + 2.0 },
-                        size: Size { width: 2.0, height: self.line_height - 4.0 },
-                    },
-                    color: Color { r: 0.9, g: 0.9, b: 0.95, a: 1.0 },
-                    corner_radius: 1.0,
-                });
+                // Blinking cursor (only visible when cursor_visible is true)
+                if self.cursor_visible {
+                    let cursor_x = explorer_width + gutter_width + 10.0 + self.cursor_col as f32 * self.char_width;
+                    scene.add(Primitive::Quad {
+                        rect: Rect {
+                            origin: Point { x: cursor_x, y: cursor_y + 2.0 },
+                            size: Size { width: 2.0, height: self.line_height - 4.0 },
+                        },
+                        color: Color { r: 0.9, g: 0.9, b: 0.95, a: 1.0 },
+                        corner_radius: 1.0,
+                    });
+                }
+            }
+        }
+
+        // Selection highlight (if any)
+        if let Some(sel) = &self.selection {
+            if !sel.is_empty() {
+                let (start_line, start_col, end_line, end_col) = sel.normalized();
+                
+                for line_idx in start_line..=end_line {
+                    if line_idx < first_line { continue; }
+                    let relative_line = line_idx - first_line;
+                    let sel_y = editor_y + relative_line as f32 * self.line_height - (self.scroll_offset % self.line_height);
+                    
+                    if sel_y >= editor_y && sel_y < height - status_height {
+                        let line_len = self.content.get(line_idx).map(|l| l.chars().count()).unwrap_or(0);
+                        let sel_start_col = if line_idx == start_line { start_col } else { 0 };
+                        let sel_end_col = if line_idx == end_line { end_col } else { line_len };
+                        
+                        let sel_x = explorer_width + gutter_width + 10.0 + sel_start_col as f32 * self.char_width;
+                        let sel_width = (sel_end_col - sel_start_col) as f32 * self.char_width;
+                        
+                        if sel_width > 0.0 {
+                            scene.add(Primitive::Quad {
+                                rect: Rect {
+                                    origin: Point { x: sel_x, y: sel_y },
+                                    size: Size { width: sel_width, height: self.line_height },
+                                },
+                                color: Color { r: 0.25, g: 0.35, b: 0.55, a: 0.5 },
+                                corner_radius: 0.0,
+                            });
+                        }
+                    }
+                }
             }
         }
 
