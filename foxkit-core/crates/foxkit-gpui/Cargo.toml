@@ -5,14 +5,17 @@ edition.workspace = true
 description = "Foxkit GPU-accelerated UI framework (inspired by Zed's GPUI)"
 
 [dependencies]
-foxkit-core = { path = "../foxkit-core" }
 gpu = { path = "../gpu" }
 theme = { path = "../theme" }
 
 tokio.workspace = true
 parking_lot.workspace = true
 serde.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
 
 wgpu.workspace = true
 winit.workspace = true
 cosmic-text.workspace = true
+pollster = "0.4"
+bytemuck = { version = "1.14", features = ["derive"] }

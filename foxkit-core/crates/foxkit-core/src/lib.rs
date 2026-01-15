@@ -58,17 +58,8 @@ impl Foxkit {
         // Initialize core services
         self.init_services()?;
         
-        // Start the UI (platform-specific)
-        #[cfg(feature = "native")]
-        {
-            foxkit_gpui::run(self.context)?;
-        }
-        
-        #[cfg(feature = "web")]
-        {
-            // WASM entry point
-            platform_web::run(self.context)?;
-        }
+        // Start the UI
+        foxkit_gpui::run()?;
         
         Ok(())
     }

@@ -3,9 +3,13 @@
 //! Inspired by Zed's GPUI, this provides a high-performance,
 //! GPU-rendered UI system for building the editor interface.
 
+pub mod window;
+
 use std::sync::Arc;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
+
+pub use window::run;
 
 /// A unique identifier for UI elements.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

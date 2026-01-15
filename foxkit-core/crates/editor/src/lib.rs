@@ -17,6 +17,7 @@ pub mod minimap;
 pub mod input;
 pub mod commands;
 pub mod word;
+pub mod controller;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -36,6 +37,7 @@ pub use scroll::{ScrollAnimation, ScrollState, EasingFunction};
 pub use soft_wrap::{SoftWrapConfig, SoftWrapEngine, WrappedLine, WrapSegment};
 pub use minimap::{MinimapRenderer, MinimapConfig, MinimapLayout, MinimapTheme};
 pub use word::{word_start, word_end, word_at, CharClass};
+pub use controller::{EditorController, ScrollOffset, DisplayLineInfo};
 
 /// Editor instance - manages a single editor pane
 pub struct Editor {

@@ -204,6 +204,7 @@ impl TextRenderer {
                 module: &shader,
                 entry_point: "vs_main",
                 buffers: &[],
+                compilation_options: Default::default(),
             },
             fragment: Some(FragmentState {
                 module: &shader,
@@ -213,6 +214,7 @@ impl TextRenderer {
                     blend: Some(BlendState::ALPHA_BLENDING),
                     write_mask: ColorWrites::ALL,
                 })],
+                compilation_options: Default::default(),
             }),
             primitive: PrimitiveState::default(),
             depth_stencil: None,
