@@ -110,14 +110,15 @@ impl FoldingService {
 
     /// Fold all at level
     pub fn fold_level(&mut self, doc_uri: &str, level: u32, ranges: &[FoldingRange]) {
+        // Compute indices first to avoid borrow conflict
+        let indices: Vec<usize> = ranges.iter().enumerate()
+            .filter(|(_, range)| self.get_range_level(range, ranges) >= level)
+            .map(|(idx, _)| idx)
+            .collect();
+        
         let folded = self.folded_ranges.entry(doc_uri.to_string()).or_default();
         folded.clear();
-        
-        for (idx, range) in ranges.iter().enumerate() {
-            if self.get_range_level(range, ranges) >= level {
-                folded.push(idx);
-            }
-        }
+        folded.extend(indices);
     }
 
     /// Get fold level of range

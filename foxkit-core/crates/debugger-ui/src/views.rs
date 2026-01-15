@@ -89,8 +89,8 @@ impl DebugViewContainer {
     }
 
     /// Get active view
-    pub fn active_view(&self) -> Option<&dyn DebugView> {
-        self.views.get(self.active).map(|v| v.as_ref())
+    pub fn active_view(&self) -> Option<&(dyn DebugView + Send + Sync)> {
+        self.views.get(self.active).map(|v| &**v)
     }
 
     /// Set active view by ID

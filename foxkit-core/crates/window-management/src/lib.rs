@@ -48,7 +48,7 @@ impl WindowManagementService {
     /// Split editor
     pub fn split(&self, direction: SplitDirection) -> EditorGroupId {
         let mut layout = self.layout.write();
-        let active_id = layout.active_group;
+        let active_id = layout.active_group.clone();
         let new_id = EditorGroupId::new();
 
         // Create new group
@@ -177,7 +177,10 @@ impl WindowManagementService {
 
         // Get tab from source
         let tab = {
-            let group = layout.groups.get_mut(from_group)?;
+            let group = match layout.groups.get_mut(from_group) {
+                Some(g) => g,
+                None => return false,
+            };
             if tab_index >= group.tabs.len() {
                 return false;
             }

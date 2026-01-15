@@ -40,7 +40,7 @@ impl WasmRuntime {
         let mut linker = self.linker.write();
 
         // Log function
-        linker.func_wrap("env", "host_log", |caller: Caller<'_, HostContext>, ptr: i32, len: i32| {
+        linker.func_wrap("env", "host_log", |mut caller: Caller<'_, HostContext>, ptr: i32, len: i32| {
             // Read string from WASM memory
             let mem = caller.get_export("memory")
                 .and_then(|e| e.into_memory());
@@ -53,20 +53,16 @@ impl WasmRuntime {
             }
         })?;
 
-        // Read file function
-        linker.func_wrap_async("env", "host_read_file", |_caller: Caller<'_, HostContext>, _path_ptr: i32, _path_len: i32| {
-            Box::new(async move {
-                // Would read file and return handle
-                0i32
-            })
+        // Read file function (sync for now)
+        linker.func_wrap("env", "host_read_file", |_caller: Caller<'_, HostContext>, _path_ptr: i32, _path_len: i32| -> i32 {
+            // Would read file and return handle
+            0i32
         })?;
 
-        // Write file function
-        linker.func_wrap_async("env", "host_write_file", |_caller: Caller<'_, HostContext>, _path_ptr: i32, _path_len: i32, _data_ptr: i32, _data_len: i32| {
-            Box::new(async move {
-                // Would write file
-                0i32
-            })
+        // Write file function (sync for now)
+        linker.func_wrap("env", "host_write_file", |_caller: Caller<'_, HostContext>, _path_ptr: i32, _path_len: i32, _data_ptr: i32, _data_len: i32| -> i32 {
+            // Would write file
+            0i32
         })?;
 
         Ok(())
@@ -116,11 +112,12 @@ impl PluginInstance {
 
     /// Call a void function
     async fn call_void(&self, name: &str) -> anyhow::Result<()> {
-        let func = self.instance.get_func(&mut *self.store.write(), name);
+        let mut store = self.store.write();
+        let func = self.instance.get_func(&mut *store, name);
         
         if let Some(func) = func {
-            let typed = func.typed::<(), ()>(&self.store.read())?;
-            typed.call_async(&mut *self.store.write(), ()).await?;
+            let typed = func.typed::<(), ()>(&*store)?;
+            typed.call_async(&mut *store, ()).await?;
         }
 
         Ok(())
@@ -134,28 +131,30 @@ impl PluginInstance {
     ) -> anyhow::Result<T> {
         let args_bytes = bincode::serialize(args)?;
         
+        let mut store = self.store.write();
+        
         // Allocate memory in WASM for args
-        let alloc = self.instance.get_typed_func::<i32, i32>(&mut *self.store.write(), "alloc")?;
-        let ptr = alloc.call_async(&mut *self.store.write(), args_bytes.len() as i32).await?;
+        let alloc = self.instance.get_typed_func::<i32, i32>(&mut *store, "alloc")?;
+        let ptr = alloc.call_async(&mut *store, args_bytes.len() as i32).await?;
         
         // Write args to WASM memory
-        let memory = self.instance.get_memory(&mut *self.store.write(), "memory")
+        let memory = self.instance.get_memory(&mut *store, "memory")
             .ok_or_else(|| anyhow::anyhow!("No memory export"))?;
         
-        memory.write(&mut *self.store.write(), ptr as usize, &args_bytes)?;
+        memory.write(&mut *store, ptr as usize, &args_bytes)?;
 
         // Call the function
-        let func = self.instance.get_typed_func::<(i32, i32), i32>(&mut *self.store.write(), name)?;
-        let result_ptr = func.call_async(&mut *self.store.write(), (ptr, args_bytes.len() as i32)).await?;
+        let func = self.instance.get_typed_func::<(i32, i32), i32>(&mut *store, name)?;
+        let result_ptr = func.call_async(&mut *store, (ptr, args_bytes.len() as i32)).await?;
 
         // Read result length (first 4 bytes at result_ptr)
         let mut len_bytes = [0u8; 4];
-        memory.read(&self.store.read(), result_ptr as usize, &mut len_bytes)?;
+        memory.read(&*store, result_ptr as usize, &mut len_bytes)?;
         let result_len = u32::from_le_bytes(len_bytes) as usize;
 
         // Read result bytes
         let mut result_bytes = vec![0u8; result_len];
-        memory.read(&self.store.read(), (result_ptr + 4) as usize, &mut result_bytes)?;
+        memory.read(&*store, (result_ptr + 4) as usize, &mut result_bytes)?;
 
         // Deserialize result
         let result: T = bincode::deserialize(&result_bytes)?;

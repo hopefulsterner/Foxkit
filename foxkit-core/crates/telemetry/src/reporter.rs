@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use crate::Event;
 
 /// Telemetry reporter trait
-#[async_trait]
+#[async_trait::async_trait]
 pub trait TelemetryReporter: Send + Sync {
     /// Report an event
     fn report(&self, event: Event);
@@ -37,7 +37,7 @@ impl BatchReporter {
     }
 }
 
-#[async_trait]
+#[async_trait::async_trait]
 impl TelemetryReporter for BatchReporter {
     fn report(&self, event: Event) {
         let mut buffer = self.buffer.lock();
@@ -80,7 +80,7 @@ impl TelemetryReporter for BatchReporter {
 /// Console reporter (for debugging)
 pub struct ConsoleReporter;
 
-#[async_trait]
+#[async_trait::async_trait]
 impl TelemetryReporter for ConsoleReporter {
     fn report(&self, event: Event) {
         tracing::info!(
@@ -98,7 +98,7 @@ impl TelemetryReporter for ConsoleReporter {
 /// Null reporter (telemetry disabled)
 pub struct NullReporter;
 
-#[async_trait]
+#[async_trait::async_trait]
 impl TelemetryReporter for NullReporter {
     fn report(&self, _event: Event) {
         // Discard
@@ -120,7 +120,7 @@ impl MultiReporter {
     }
 }
 
-#[async_trait]
+#[async_trait::async_trait]
 impl TelemetryReporter for MultiReporter {
     fn report(&self, event: Event) {
         for reporter in &self.reporters {

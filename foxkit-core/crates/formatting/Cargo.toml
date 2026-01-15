@@ -9,3 +9,4 @@ foxkit-core = { path = "../foxkit-core" }
 
 serde.workspace = true
 parking_lot.workspace = true
+serde_json.workspace = true

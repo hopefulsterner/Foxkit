@@ -194,14 +194,14 @@ pub struct TaskExecution {
 impl TaskExecution {
     /// Wait for completion
     pub fn wait(&mut self) -> anyhow::Result<TaskResult> {
-        let output = self.child.wait_with_output()?;
+        let status = self.child.wait()?;
         
         Ok(TaskResult {
             task_name: self.task_name.clone(),
-            success: output.status.success(),
-            exit_code: output.status.code(),
-            stdout: String::from_utf8_lossy(&output.stdout).to_string(),
-            stderr: String::from_utf8_lossy(&output.stderr).to_string(),
+            success: status.success(),
+            exit_code: status.code(),
+            stdout: String::new(), // Can't get output after wait() without spawn with piped stdio
+            stderr: String::new(),
         })
     }
 

@@ -54,7 +54,7 @@ pub trait Connection: Send + Sync {
 }
 
 /// Command execution result
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ExecResult {
     pub exit_code: i32,
     pub stdout: String,

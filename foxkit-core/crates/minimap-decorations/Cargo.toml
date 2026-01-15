@@ -10,5 +10,6 @@ diagnostics = { path = "../diagnostics" }
 
 parking_lot.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 
 tracing = "0.1"

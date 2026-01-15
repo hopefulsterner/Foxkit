@@ -187,7 +187,8 @@ fn uuid_v4() -> String {
 
 /// Capture backtrace
 fn capture_backtrace() -> Option<String> {
-    std::env::set_var("RUST_BACKTRACE", "1");
+    // SAFETY: This is called from a panic handler, which is single-threaded context
+    unsafe { std::env::set_var("RUST_BACKTRACE", "1"); }
     let bt = std::backtrace::Backtrace::capture();
     match bt.status() {
         std::backtrace::BacktraceStatus::Captured => Some(bt.to_string()),

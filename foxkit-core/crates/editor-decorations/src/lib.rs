@@ -58,10 +58,8 @@ impl EditorDecorationsService {
         }
 
         // Remove existing decorations of this type
-        let file_decorations = self.decorations
-            .write()
-            .entry(file)
-            .or_default();
+        let mut guard = self.decorations.write();
+        let file_decorations = guard.entry(file).or_default();
         
         file_decorations.retain(|d| d.type_id != type_id);
         file_decorations.extend(decorations);

@@ -5,7 +5,7 @@ use crate::{View, ViewId};
 
 /// Registry for views
 pub struct ViewRegistry {
-    views: HashMap<String, Box<dyn View>>,
+    views: HashMap<String, Box<dyn View + Send + Sync>>,
 }
 
 impl ViewRegistry {
@@ -27,13 +27,18 @@ impl ViewRegistry {
     }
 
     /// Get a view
-    pub fn get(&self, id: &ViewId) -> Option<&dyn View> {
-        self.views.get(id.as_str()).map(|v| v.as_ref())
+    pub fn get(&self, id: &ViewId) -> Option<&(dyn View + Send + Sync)> {
+        let key = id.as_str();
+        self.views.get(key).map(|v| &**v)
     }
 
     /// Get a view mutably
-    pub fn get_mut(&mut self, id: &ViewId) -> Option<&mut dyn View> {
-        self.views.get_mut(id.as_str()).map(|v| v.as_mut())
+    pub fn get_mut(&mut self, id: &ViewId) -> Option<&mut (dyn View + Send + Sync)> {
+        let key = id.as_str().to_string();
+        match self.views.get_mut(&key) {
+            Some(v) => Some(&mut **v),
+            None => None,
+        }
     }
 
     /// Check if view exists

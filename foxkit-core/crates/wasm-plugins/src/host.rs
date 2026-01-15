@@ -165,13 +165,13 @@ impl FoxkitHostFunctions {
 
 impl HostFunctions for FoxkitHostFunctions {
     fn log(&self, level: LogLevel, message: &str) {
-        let target = format!("plugin.{}", self.context.manifest.id);
+        let plugin_id = &self.context.manifest.id;
         match level {
-            LogLevel::Trace => tracing::trace!(target: &*target, "{}", message),
-            LogLevel::Debug => tracing::debug!(target: &*target, "{}", message),
-            LogLevel::Info => tracing::info!(target: &*target, "{}", message),
-            LogLevel::Warn => tracing::warn!(target: &*target, "{}", message),
-            LogLevel::Error => tracing::error!(target: &*target, "{}", message),
+            LogLevel::Trace => tracing::trace!(plugin_id = %plugin_id, "{}", message),
+            LogLevel::Debug => tracing::debug!(plugin_id = %plugin_id, "{}", message),
+            LogLevel::Info => tracing::info!(plugin_id = %plugin_id, "{}", message),
+            LogLevel::Warn => tracing::warn!(plugin_id = %plugin_id, "{}", message),
+            LogLevel::Error => tracing::error!(plugin_id = %plugin_id, "{}", message),
         }
     }
 

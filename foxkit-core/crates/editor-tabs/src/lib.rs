@@ -52,10 +52,15 @@ impl EditorTabsService {
         let mut groups = self.groups.write();
         let active_id = self.active_group.read().clone();
 
-        let group = active_id
-            .and_then(|id| groups.get_mut(&id))
-            .or_else(|| groups.values_mut().next())
-            .expect("No tab group available");
+        let group = if let Some(id) = active_id {
+            if let Some(g) = groups.get_mut(&id) {
+                g
+            } else {
+                groups.values_mut().next().expect("No tab group available")
+            }
+        } else {
+            groups.values_mut().next().expect("No tab group available")
+        };
 
         // Check if already open
         if let Some(existing) = group.tabs.iter().find(|t| t.file == Some(file.clone())) {
@@ -102,10 +107,15 @@ impl EditorTabsService {
         let mut groups = self.groups.write();
         let active_id = self.active_group.read().clone();
 
-        let group = active_id
-            .and_then(|id| groups.get_mut(&id))
-            .or_else(|| groups.values_mut().next())
-            .expect("No tab group available");
+        let group = if let Some(id) = active_id {
+            if let Some(g) = groups.get_mut(&id) {
+                g
+            } else {
+                groups.values_mut().next().expect("No tab group available")
+            }
+        } else {
+            groups.values_mut().next().expect("No tab group available")
+        };
 
         let tab = Tab::new_untitled();
         let id = tab.id.clone();

@@ -110,20 +110,21 @@ impl FontLigaturesService {
 
         let mut matches = Vec::new();
         
-        // Get all enabled ligatures
-        let all_ligatures: Vec<&str> = {
+        // Get all enabled ligatures as owned Strings
+        let all_ligatures: Vec<String> = {
             let sets = self.enabled_sets.read();
             let custom = self.custom_enabled.read();
             let disabled = self.custom_disabled.read();
 
-            let mut ligs: Vec<&str> = sets.iter()
+            let mut ligs: Vec<String> = sets.iter()
                 .flat_map(|s| s.ligatures())
+                .copied()
                 .filter(|l| !disabled.contains(*l))
+                .map(|s| s.to_string())
                 .collect();
 
-            // Add custom enabled (need to convert to &str)
-            // Note: this is simplified - real impl would handle lifetimes properly
-            ligs.extend(custom.iter().map(|s| s.as_str()));
+            // Add custom enabled
+            ligs.extend(custom.iter().cloned());
             ligs
         };
 
@@ -171,6 +172,7 @@ impl FontLigaturesService {
 
         let mut ligs: Vec<String> = sets.iter()
             .flat_map(|s| s.ligatures())
+            .copied()
             .filter(|l| !disabled.contains(*l))
             .map(|s| s.to_string())
             .collect();
