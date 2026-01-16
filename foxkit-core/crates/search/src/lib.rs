@@ -14,7 +14,7 @@ use parking_lot::RwLock;
 use crossbeam_channel::{Sender, Receiver, unbounded};
 
 pub use query::{SearchQuery, SearchOptions};
-pub use result::{SearchResult, Match, FileMatch};
+pub use result::{SearchResult, Match, FileMatch, ContextLine};
 pub use file_search::FileSearcher;
 pub use text_search::TextSearcher;
 pub use replace::Replacer;

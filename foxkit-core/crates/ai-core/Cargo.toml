@@ -6,10 +6,12 @@ description = "AI-native core for Foxkit - the intelligent brain 🧠"
 
 [dependencies]
 foxkit-core = { path = "../foxkit-core" }
+monorepo = { path = "../monorepo" }
 
 tokio.workspace = true
 async-trait.workspace = true
 futures.workspace = true
+parking_lot.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
@@ -20,3 +22,6 @@ thiserror = "1.0"
 tracing = "0.1"
 async-stream = "0.3"
 bytes = "1.7"
+walkdir = "2.5"
+globset = "0.4"
+rayon = "1.10"

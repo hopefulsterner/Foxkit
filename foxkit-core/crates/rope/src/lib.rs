@@ -115,7 +115,7 @@ impl Rope {
     }
 
     /// Create a cursor at offset
-    pub fn cursor(&self, offset: usize) -> Cursor {
+    pub fn cursor(&self, offset: usize) -> Cursor<'_> {
         Cursor::new(self, offset)
     }
 
@@ -332,7 +332,7 @@ impl Node {
         let mut col = 0;
         let mut pos = 0;
 
-        for chunk_str in ChunkIterator { stack: vec![self] } {
+        for chunk_str in (ChunkIterator { stack: vec![self] }) {
             for c in chunk_str.chars() {
                 if pos == offset {
                     return Point { line, column: col };
@@ -351,7 +351,7 @@ impl Node {
     }
 
     fn rebalance(&mut self) {
-        if let Node::Branch { left, right, len, line_count } = self {
+        if let Node::Branch { left, right, len: _, line_count: _ } = self {
             left.rebalance();
             right.rebalance();
             

@@ -117,12 +117,12 @@ impl PanelManager {
     }
 
     /// Get view by id
-    pub fn get_view(&self, id: &ViewId) -> Option<&dyn View> {
+    pub fn get_view(&self, id: &ViewId) -> Option<&(dyn View + Send + Sync)> {
         self.registry.get(id)
     }
 
     /// Get view mutably
-    pub fn get_view_mut(&mut self, id: &ViewId) -> Option<&mut dyn View> {
+    pub fn get_view_mut(&mut self, id: &ViewId) -> Option<&mut (dyn View + Send + Sync)> {
         self.registry.get_mut(id)
     }
 }

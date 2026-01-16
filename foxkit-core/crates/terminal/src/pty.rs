@@ -96,7 +96,9 @@ impl Pty {
                 
                 // Set environment
                 for (key, value) in env {
-                    std::env::set_var(key, value);
+                    // SAFETY: We're in a forked child process before exec,
+                    // so no other threads exist that could race
+                    unsafe { std::env::set_var(key, value); }
                 }
                 
                 // Exec shell

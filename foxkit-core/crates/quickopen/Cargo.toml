@@ -11,6 +11,7 @@ keybindings = { path = "../keybindings" }
 tokio.workspace = true
 parking_lot.workspace = true
 serde.workspace = true
+async-trait.workspace = true
 
 anyhow = "1.0"
 tracing = "0.1"

@@ -131,9 +131,28 @@ impl Default for SpanContext {
 
 bitflags::bitflags! {
     /// Trace flags
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub struct TraceFlags: u8 {
         const SAMPLED = 0x01;
+    }
+}
+
+impl serde::Serialize for TraceFlags {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(self.bits())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for TraceFlags {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let bits = u8::deserialize(deserializer)?;
+        Ok(TraceFlags::from_bits_truncate(bits))
     }
 }
 

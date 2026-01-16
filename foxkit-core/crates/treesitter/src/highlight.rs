@@ -1,22 +1,81 @@
 //! Syntax highlighting
+//!
+//! Provides syntax highlighting using tree-sitter queries.
+//! Supports both embedded fallback queries and loading from files.
 
-use crate::{Language, Node, Tree};
+use crate::{Language, Tree};
+use crate::query_loader::{QueryLoader, QueryType, LoadedQuery};
+use std::sync::Arc;
 
 /// Syntax highlighter
 pub struct Highlighter {
     language: Language,
     query: Option<tree_sitter::Query>,
+    /// Source of the query (for debugging)
+    #[allow(dead_code)]
+    query_source: Option<Arc<LoadedQuery>>,
 }
 
 impl Highlighter {
-    /// Create a new highlighter
+    /// Create a new highlighter with embedded queries
     pub fn new(language: Language) -> Self {
         let query_source = Self::highlight_query(&language);
         let query = query_source.and_then(|q| {
             tree_sitter::Query::new(&language.ts_language(), q).ok()
         });
 
-        Self { language, query }
+        Self { 
+            language, 
+            query,
+            query_source: None,
+        }
+    }
+
+    /// Create a highlighter using queries from a loader
+    pub fn with_loader(language: Language, loader: &QueryLoader) -> Self {
+        let language_id = language.id();
+        let loaded = loader.load(language_id, QueryType::Highlights);
+        
+        let query = loaded.as_ref().and_then(|q| {
+            match tree_sitter::Query::new(&language.ts_language(), &q.source) {
+                Ok(query) => Some(query),
+                Err(e) => {
+                    tracing::warn!(
+                        "Failed to compile highlight query for {}: {:?}",
+                        language_id, e
+                    );
+                    None
+                }
+            }
+        });
+
+        Self {
+            language,
+            query,
+            query_source: loaded,
+        }
+    }
+
+    /// Create a highlighter with a custom query string
+    pub fn with_query(language: Language, query_source: &str) -> anyhow::Result<Self> {
+        let query = tree_sitter::Query::new(&language.ts_language(), query_source)
+            .map_err(|e| anyhow::anyhow!("Query error: {:?}", e))?;
+        
+        Ok(Self {
+            language,
+            query: Some(query),
+            query_source: None,
+        })
+    }
+
+    /// Check if highlighter has a valid query
+    pub fn has_query(&self) -> bool {
+        self.query.is_some()
+    }
+
+    /// Get language ID
+    pub fn language_id(&self) -> &str {
+        self.language.id()
     }
 
     /// Highlight source code

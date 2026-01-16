@@ -119,10 +119,11 @@ impl WorkspaceEditService {
             });
         }
 
+        let total_files = file_previews.len();
         WorkspaceEditPreview {
             label: edit.label.clone(),
             files: file_previews,
-            total_files: file_previews.len(),
+            total_files,
         }
     }
 

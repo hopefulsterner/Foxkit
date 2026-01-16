@@ -225,19 +225,23 @@ impl<'a> ProgressHandle<'a> {
 
     /// Set message without changing value
     pub fn message(&self, message: &str) {
-        let progress = self.service.progress.read();
-        if let Some(p) = progress.iter().find(|p| p.id == self.id) {
-            drop(progress);
-            self.service.update_progress(&self.id, p.value, Some(message));
+        let value = {
+            let progress = self.service.progress.read();
+            progress.iter().find(|p| p.id == self.id).map(|p| p.value)
+        };
+        if let Some(v) = value {
+            self.service.update_progress(&self.id, v, Some(message));
         }
     }
 
     /// Increment by amount
     pub fn increment(&self, amount: f32) {
-        let progress = self.service.progress.read();
-        if let Some(p) = progress.iter().find(|p| p.id == self.id) {
-            let new_value = (p.value + amount).clamp(0.0, 1.0);
-            drop(progress);
+        let value = {
+            let progress = self.service.progress.read();
+            progress.iter().find(|p| p.id == self.id).map(|p| p.value)
+        };
+        if let Some(v) = value {
+            let new_value = (v + amount).clamp(0.0, 1.0);
             self.service.update_progress(&self.id, new_value, None);
         }
     }

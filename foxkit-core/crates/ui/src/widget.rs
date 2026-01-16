@@ -1,6 +1,7 @@
 //! Built-in widgets
 
-use crate::{Element, ElementKind, Style, StyleBuilder, Context};
+use crate::element::ElementKind;
+use crate::{Element, Style, StyleBuilder, Context};
 use crate::style::Color;
 use crate::layout::{Direction, Edge};
 

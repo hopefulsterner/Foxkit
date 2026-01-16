@@ -14,11 +14,11 @@ pub struct TaskScheduler {
     /// Maximum parallel tasks
     max_parallel: usize,
     /// Running tasks
-    running: RwLock<HashMap<TaskId, RunningTask>>,
+    running: Arc<RwLock<HashMap<TaskId, RunningTask>>>,
     /// Task queue
     queue: RwLock<VecDeque<QueuedTask>>,
     /// Completed tasks
-    completed: RwLock<HashSet<String>>,
+    completed: Arc<RwLock<HashSet<String>>>,
     /// Event sender
     event_tx: broadcast::Sender<SchedulerEvent>,
     /// Semaphore for parallelism control
@@ -59,9 +59,9 @@ impl TaskScheduler {
         let (event_tx, _) = broadcast::channel(256);
         Self {
             max_parallel,
-            running: RwLock::new(HashMap::new()),
+            running: Arc::new(RwLock::new(HashMap::new())),
             queue: RwLock::new(VecDeque::new()),
-            completed: RwLock::new(HashSet::new()),
+            completed: Arc::new(RwLock::new(HashSet::new())),
             event_tx,
             semaphore: Arc::new(Semaphore::new(max_parallel)),
         }
@@ -135,7 +135,7 @@ impl TaskScheduler {
             let id = task.id;
             let name = task.task.name.clone();
             let event_tx = self.event_tx.clone();
-            let completed = Arc::new(self.completed.clone());
+            let completed = self.completed.clone();
             
             let (cancel_tx, mut cancel_rx) = mpsc::channel::<()>(1);
             
@@ -152,7 +152,7 @@ impl TaskScheduler {
             });
             
             let task_clone = task.task.clone();
-            let running = Arc::new(self.running.clone());
+            let running = self.running.clone();
             
             tokio::spawn(async move {
                 let started = std::time::Instant::now();
@@ -311,7 +311,7 @@ impl TaskGraph {
         }
         
         let mut queue: VecDeque<String> = in_degree.iter()
-            .filter(|(_, &deg)| deg == 0)
+            .filter(|&(_, deg)| *deg == 0)
             .map(|(name, _)| name.clone())
             .collect();
         
@@ -351,7 +351,7 @@ impl TaskGraph {
         
         let mut stages = Vec::new();
         let mut queue: VecDeque<String> = in_degree.iter()
-            .filter(|(_, &deg)| deg == 0)
+            .filter(|&(_, deg)| *deg == 0)
             .map(|(name, _)| name.clone())
             .collect();
         

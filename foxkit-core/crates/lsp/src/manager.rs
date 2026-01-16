@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use parking_lot::RwLock;
 use tokio::sync::mpsc;
 use anyhow::Result;
-use lsp_types::Url;
 
 use crate::{ServerConfig, LspClient, LspEvent, servers};
 

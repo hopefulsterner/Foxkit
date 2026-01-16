@@ -35,7 +35,7 @@ impl CommandExecutor {
                 editor.delete_line();
             }
             EditorCommand::DeleteWord => {
-                editor.delete_word();
+                editor.delete_word(true);  // Default: delete forward
             }
             EditorCommand::DeleteToLineEnd => {
                 editor.delete_to_line_end();

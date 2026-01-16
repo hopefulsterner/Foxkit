@@ -15,11 +15,7 @@ pub use capabilities::{build_client_capabilities, ServerCapabilityAnalyzer};
 pub use requests::{LspRequestBuilder, LspNotificationBuilder, file_uri, pos, range};
 pub use workspace::{WorkspaceManager, TextDocument, WorkspaceConfiguration, LanguageConfiguration};
 
-use std::sync::Arc;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use parking_lot::RwLock;
-use anyhow::Result;
 
 pub use lsp_types::*;
 pub use client::LspClient;
@@ -125,7 +121,7 @@ pub mod servers {
 /// LSP request/response types
 #[derive(Debug)]
 pub struct PendingRequest {
-    pub id: RequestId,
+    pub id: i32,
     pub method: String,
     pub sent_at: std::time::Instant,
 }

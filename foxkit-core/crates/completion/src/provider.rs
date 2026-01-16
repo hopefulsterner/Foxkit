@@ -31,7 +31,7 @@ pub mod builtin {
 
     impl KeywordProvider {
         pub fn new() -> Self {
-            let mut keywords = std::collections::HashMap::new();
+            let mut keywords: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
             
             // Rust keywords
             keywords.insert("rust".to_string(), vec![

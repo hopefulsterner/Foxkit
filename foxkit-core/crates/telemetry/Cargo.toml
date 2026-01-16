@@ -8,10 +8,14 @@ description = "Foxkit Telemetry - metrics, logging, and tracing"
 tokio.workspace = true
 parking_lot.workspace = true
 serde.workspace = true
+async-trait.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
 
 anyhow = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+bitflags = "2.4"
 
 # Metrics
 metrics = "0.24"

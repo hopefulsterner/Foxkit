@@ -3,6 +3,7 @@
 //! Convenient builders for LSP requests.
 
 use lsp_types::*;
+use lsp_types::request::{GotoTypeDefinitionParams, GotoImplementationParams, GotoDeclarationParams};
 use std::path::Path;
 
 /// Request builder for LSP operations
@@ -412,7 +413,7 @@ impl LspRequestBuilder {
     pub fn execute_command(command: &str, arguments: Option<Vec<serde_json::Value>>) -> ExecuteCommandParams {
         ExecuteCommandParams {
             command: command.to_string(),
-            arguments,
+            arguments: arguments.unwrap_or_default(),
             work_done_progress_params: WorkDoneProgressParams::default(),
         }
     }

@@ -283,7 +283,7 @@ impl PackageDetector for NpmDetector {
             }
         }
         
-        let workspace_members = manifest.get("workspaces")
+        let workspace_members: Vec<String> = manifest.get("workspaces")
             .and_then(|w| w.as_array())
             .map(|arr| arr.iter().filter_map(|v| v.as_str().map(String::from)).collect())
             .unwrap_or_default();

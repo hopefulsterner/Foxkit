@@ -65,9 +65,8 @@ impl KeybindingsEditorService {
         let path = self.file_path.read().clone()
             .ok_or_else(|| anyhow::anyhow!("No keybindings file path set"))?;
 
-        let overrides: Vec<&KeybindingOverride> = self.overrides.read()
-            .values()
-            .collect();
+        let guard = self.overrides.read();
+        let overrides: Vec<&KeybindingOverride> = guard.values().collect();
 
         let json = serde_json::to_string_pretty(&overrides)?;
         std::fs::write(path, json)?;

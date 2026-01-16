@@ -1,0 +1,5 @@
+/workspaces/Foxkit/foxkit-core/target/debug/build/serde-cbc1ead2e3f76bf4/build_script_build-cbc1ead2e3f76bf4.d: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/build.rs
+
+/workspaces/Foxkit/foxkit-core/target/debug/build/serde-cbc1ead2e3f76bf4/build_script_build-cbc1ead2e3f76bf4: /home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/build.rs
+
+/home/codespace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/build.rs:

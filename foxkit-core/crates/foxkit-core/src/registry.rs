@@ -56,9 +56,12 @@ impl ServiceRegistry {
             return service.clone().downcast::<S>().ok();
         }
 
-        // Try to create from factory
-        let factory = self.factories.read().get(&type_id)?.clone();
-        let service = factory();
+        // Try to create from factory - call factory while holding read lock
+        let service = {
+            let factories = self.factories.read();
+            let factory = factories.get(&type_id)?;
+            factory()
+        };
         
         // Cache as singleton
         self.singletons.write().insert(type_id, Arc::clone(&service));

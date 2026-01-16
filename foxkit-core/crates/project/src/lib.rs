@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
-pub use detect::{ProjectType, detect_project, ProjectInfo};
+pub use detect::{ProjectType, detect_project};
 pub use config::ProjectConfig;
 pub use tasks::{Task, TaskGroup, TaskRunner};
 
@@ -61,13 +61,12 @@ impl Project {
         match self.project_type {
             ProjectType::Node | ProjectType::TypeScript => {
                 if let Some(ref scripts) = self.info.scripts {
-                    for (name, cmd) in scripts {
-                        tasks.push(Task {
-                            name: name.clone(),
-                            command: format!("npm run {}", name),
-                            group: TaskGroup::Build,
-                            is_default: name == "build",
-                        });
+                    for (name, _cmd) in scripts {
+                        let mut task = Task::new(name, &format!("npm run {}", name), TaskGroup::Build);
+                        if name == "build" {
+                            task = task.with_default();
+                        }
+                        tasks.push(task);
                     }
                 }
             }

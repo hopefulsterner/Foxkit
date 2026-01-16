@@ -100,7 +100,7 @@ pub struct DiagnosticInfo {
 }
 
 /// Diagnostic severity
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum DiagnosticSeverity {
     Error,
     Warning,

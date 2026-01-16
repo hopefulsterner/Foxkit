@@ -73,7 +73,7 @@ impl Tree {
 /// Syntax node
 #[derive(Clone, Copy)]
 pub struct Node<'a> {
-    inner: tree_sitter::Node<'a>,
+    pub(crate) inner: tree_sitter::Node<'a>,
 }
 
 impl<'a> Node<'a> {
@@ -145,7 +145,7 @@ impl<'a> Node<'a> {
     }
 
     /// Iterate children
-    pub fn children(&self, cursor: &mut TreeCursor<'a>) -> impl Iterator<Item = Node<'a>> + '_ {
+    pub fn children<'b>(&'b self, cursor: &'b mut TreeCursor<'a>) -> impl Iterator<Item = Node<'a>> + 'b {
         cursor.inner.reset(self.inner);
         cursor.inner.goto_first_child();
         

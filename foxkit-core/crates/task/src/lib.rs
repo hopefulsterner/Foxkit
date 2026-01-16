@@ -322,9 +322,10 @@ impl TaskService {
         let task = self.get(name)
             .ok_or_else(|| anyhow::anyhow!("Task not found: {}", name))?;
 
-        // Run dependencies first
-        for dep in &task.depends_on {
-            self.run(dep).await?;
+        // Run dependencies first (collect to avoid recursive borrow)
+        let deps: Vec<String> = task.depends_on.clone();
+        for dep in deps {
+            Box::pin(self.run(&dep)).await?;
         }
 
         let id = TaskId::new();

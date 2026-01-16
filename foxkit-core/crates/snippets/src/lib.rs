@@ -203,8 +203,8 @@ pub fn builtin_snippets() -> HashMap<String, SnippetFile> {
         "console.log($0);".to_string(),
     ]).with_description("Console log"));
 
-    files.insert("typescript".to_string(), typescript);
     files.insert("javascript".to_string(), typescript.clone());
+    files.insert("typescript".to_string(), typescript);
 
     // Python snippets
     let mut python = SnippetFile::new();

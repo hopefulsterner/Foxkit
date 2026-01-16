@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use wgpu::*;
 
-use crate::{Color, Point};
 
 /// Glyph identifier
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -202,13 +201,13 @@ impl TextRenderer {
             layout: Some(&pipeline_layout),
             vertex: VertexState {
                 module: &shader,
-                entry_point: Some("vs_main"),
+                entry_point: "vs_main",
                 buffers: &[],
                 compilation_options: Default::default(),
             },
             fragment: Some(FragmentState {
                 module: &shader,
-                entry_point: Some("fs_main"),
+                entry_point: "fs_main",
                 targets: &[Some(ColorTargetState {
                     format,
                     blend: Some(BlendState::ALPHA_BLENDING),
@@ -220,7 +219,6 @@ impl TextRenderer {
             depth_stencil: None,
             multisample: MultisampleState::default(),
             multiview: None,
-            cache: None,
         });
 
         Self {

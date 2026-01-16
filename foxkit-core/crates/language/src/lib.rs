@@ -92,8 +92,8 @@ pub struct Language {
 
 /// Grammar for syntax highlighting.
 pub struct Grammar {
-    /// Tree-sitter language pointer.
-    pub ts_language: tree_sitter::Language,
+    /// Tree-sitter language pointer (as opaque type).
+    pub ts_language: treesitter::Language,
     /// Highlight queries.
     pub highlights_query: Option<String>,
     /// Injection queries.

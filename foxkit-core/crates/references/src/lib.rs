@@ -9,7 +9,7 @@ use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
 
-pub use goto_definition::{Location, Position, Range};
+pub use goto_definition::{Location, GotoPosition as Position, LocationRange as Range};
 
 /// References service
 pub struct ReferencesService {
@@ -118,7 +118,7 @@ fn group_by_file(references: &[Reference]) -> HashMap<PathBuf, Vec<Reference>> {
 
     // Sort references within each file by line
     for refs in grouped.values_mut() {
-        refs.sort_by_key(|r| (r.location.range.start.line, r.location.range.start.col));
+        refs.sort_by_key(|r| (r.location.position.line, r.location.position.col));
     }
 
     grouped

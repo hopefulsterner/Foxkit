@@ -41,16 +41,16 @@ pub trait PluginApi {
     fn create_output_channel(&self, name: &str) -> OutputChannel;
 
     /// Register tree data provider
-    fn register_tree_provider(&self, view_id: &str, provider: TreeDataProvider);
+    fn register_tree_provider(&self, view_id: &str, provider: Box<dyn TreeDataProvider>);
 
     /// Get configuration
     fn get_configuration(&self, section: &str) -> Configuration;
 
     /// Register completion provider
-    fn register_completion_provider(&self, selector: DocumentSelector, provider: CompletionProvider);
+    fn register_completion_provider(&self, selector: DocumentSelector, provider: Box<dyn CompletionProvider>);
 
     /// Register hover provider
-    fn register_hover_provider(&self, selector: DocumentSelector, provider: HoverProvider);
+    fn register_hover_provider(&self, selector: DocumentSelector, provider: Box<dyn HoverProvider>);
 }
 
 /// Command handler function type

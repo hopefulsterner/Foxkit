@@ -5,7 +5,6 @@
 
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
-use std::sync::Arc;
 use parking_lot::RwLock;
 use async_trait::async_trait;
 

@@ -150,7 +150,7 @@ impl QuickPick {
 }
 
 /// Quick pick item
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct QuickPickItem {
     /// Label
     pub label: String,
@@ -167,6 +167,20 @@ pub struct QuickPickItem {
     /// Custom data
     #[serde(skip)]
     pub data: Option<Box<dyn std::any::Any + Send + Sync>>,
+}
+
+impl Clone for QuickPickItem {
+    fn clone(&self) -> Self {
+        Self {
+            label: self.label.clone(),
+            description: self.description.clone(),
+            detail: self.detail.clone(),
+            icon: self.icon.clone(),
+            picked: self.picked,
+            always_show: self.always_show,
+            data: None, // Cannot clone dyn Any
+        }
+    }
 }
 
 impl QuickPickItem {

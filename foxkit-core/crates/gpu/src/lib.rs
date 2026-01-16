@@ -12,9 +12,12 @@ pub mod renderer;
 pub mod scene;
 pub mod shaders;
 pub mod text;
+pub mod font;
+pub mod editor_bridge;
+pub mod integrated_text;
+pub mod pipeline;
 
 use std::sync::Arc;
-use parking_lot::RwLock;
 use anyhow::Result;
 use wgpu::*;
 
@@ -22,6 +25,10 @@ pub use context::GpuContext;
 pub use renderer::Renderer;
 pub use scene::{Scene, Primitive};
 pub use text::{TextRenderer, GlyphCache};
+pub use font::{FontSystem, FontKey, FontWeight, FontStyle, RasterizedGlyph, GlyphMetrics, FontMetrics, SharedFontSystem};
+pub use editor_bridge::{EditorSceneBuilder, EditorRenderCommand, LineStyle as EditorLineStyle};
+pub use integrated_text::{IntegratedTextRenderer, PositionedGlyph, AtlasGlyph, TextVertex, build_text_vertices};
+pub use pipeline::{EditorRenderPipeline, FrameBuilder, RenderConfig};
 
 /// GPU subsystem
 pub struct Gpu {
@@ -77,7 +84,6 @@ impl Gpu {
                     label: Some("Foxkit GPU"),
                     required_features: Features::empty(),
                     required_limits: Limits::default(),
-                    memory_hints: MemoryHints::Performance,
                 },
                 None,
             )

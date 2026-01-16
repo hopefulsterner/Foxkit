@@ -9,3 +9,8 @@ foxkit-core = { path = "../foxkit-core" }
 
 serde.workspace = true
 parking_lot.workspace = true
+async-trait.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+anyhow = "1.0"
+thiserror = "1.0"

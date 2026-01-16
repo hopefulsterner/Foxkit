@@ -5,6 +5,8 @@ edition.workspace = true
 description = "Core foundation for Foxkit IDE"
 
 [dependencies]
+foxkit-gpui = { path = "../foxkit-gpui" }
+
 tokio.workspace = true
 async-trait.workspace = true
 futures.workspace = true
@@ -19,3 +21,5 @@ thiserror = "1.0"
 tracing = "0.1"
 uuid = { version = "1.10", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
+toml = "0.8"
+dirs = "5.0"

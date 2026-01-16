@@ -622,16 +622,16 @@ pub fn build_command_prompt(command: &ParsedCommand, context: &CommandContext) -
             ));
         }
         "doc" => {
+            let default_style = context.language.as_ref().map(|l| match l.as_str() {
+                "rust" => "rustdoc",
+                "python" => "pydoc",
+                "javascript" | "typescript" => "jsdoc",
+                "java" | "kotlin" => "javadoc",
+                _ => "markdown"
+            }).unwrap_or("markdown");
             let style = command.arguments.get("style")
-                .or(context.language.as_ref().map(|l| match l.as_str() {
-                    "rust" => "rustdoc",
-                    "python" => "pydoc",
-                    "javascript" | "typescript" => "jsdoc",
-                    "java" | "kotlin" => "javadoc",
-                    _ => "markdown"
-                }).map(String::from).as_ref())
                 .map(|s| s.as_str())
-                .unwrap_or("markdown");
+                .unwrap_or(default_style);
             
             prompt.push_str(&format!(
                 "Generate {} documentation for the following code:\n\n",
@@ -645,16 +645,16 @@ pub fn build_command_prompt(command: &ParsedCommand, context: &CommandContext) -
             }
         }
         "test" => {
+            let default_framework = context.language.as_ref().map(|l| match l.as_str() {
+                "rust" => "rust",
+                "python" => "pytest",
+                "javascript" | "typescript" => "jest",
+                "java" => "junit",
+                _ => "jest"
+            }).unwrap_or("jest");
             let framework = command.arguments.get("framework")
-                .or(context.language.as_ref().map(|l| match l.as_str() {
-                    "rust" => "rust",
-                    "python" => "pytest",
-                    "javascript" | "typescript" => "jest",
-                    "java" => "junit",
-                    _ => "jest"
-                }).map(String::from).as_ref())
                 .map(|s| s.as_str())
-                .unwrap_or("jest");
+                .unwrap_or(default_framework);
             let coverage = command.arguments.get("coverage").map(|s| s.as_str()).unwrap_or("thorough");
             
             prompt.push_str(&format!(

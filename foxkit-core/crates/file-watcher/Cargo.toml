@@ -14,3 +14,4 @@ serde.workspace = true
 anyhow = "1.0"
 tracing = "0.1"
 notify = "6.1"
+uuid = { version = "1.0", features = ["v4"] }

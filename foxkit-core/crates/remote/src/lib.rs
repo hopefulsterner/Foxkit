@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use parking_lot::RwLock;
 
-pub use connection::{Connection, ConnectionConfig, ConnectionState};
+pub use connection::{Connection, ConnectionConfig, ConnectionState, ConnectionInfo, ConnectionType, ExecResult};
 pub use ssh::{SshConnection, SshConfig};
 pub use container::{ContainerConnection, ContainerConfig};
 pub use tunnel::{Tunnel, TunnelConfig, PortForward};
@@ -46,7 +46,7 @@ impl RemoteService {
         };
 
         self.connections.write().push(conn.clone());
-        self.emit(RemoteEvent::Connected(conn.id()));
+        self.emit(RemoteEvent::Connected(conn.id().to_string()));
 
         Ok(conn)
     }
