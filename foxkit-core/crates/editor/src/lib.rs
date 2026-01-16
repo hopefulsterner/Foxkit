@@ -1152,6 +1152,8 @@ impl Editor {
         self.find_query = Some(FindState {
             query: query.to_string(),
             case_sensitive: false,
+            whole_word: false,
+            regex: false,
             matches,
             current_match,
         });
