@@ -798,7 +798,11 @@ impl Editor {
         for selection in self.selections.iter_mut() {
             let offset = selection.head.offset;
             let (start, end) = word::word_at(content, offset);
-            if start != end {
+
+            // Only update the selection if the returned bounds form a valid,
+            // non-empty span that contains the current offset. This preserves
+            // the previous "no word here" behavior that used Option.
+            if start < end && start <= offset && offset <= end {
                 selection.anchor.offset = start;
                 selection.head.offset = end;
             }
