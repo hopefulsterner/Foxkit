@@ -174,7 +174,7 @@ pub struct SyntaxError {
 }
 
 /// Find all syntax errors in tree
-pub fn find_errors(tree: &Tree, source: &str) -> Vec<SyntaxError> {
+pub fn find_errors(tree: &Tree, _source: &str) -> Vec<SyntaxError> {
     let mut errors = Vec::new();
     let mut cursor = tree.walk();
     

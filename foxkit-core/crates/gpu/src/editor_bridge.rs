@@ -3,7 +3,7 @@
 //! Connects the editor's RenderCommand system to the GPU Scene primitive system.
 //! This module translates high-level editor rendering commands into GPU-renderable primitives.
 
-use crate::{Color, Point, Rect, Scene, Primitive};
+use crate::{Color, Point, Rect, Scene};
 
 /// Line style for rendering
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -234,7 +234,7 @@ impl EditorSceneBuilder {
             let x = start.x + t;
             
             // Alternate up and down
-            let phase = (i % 4) as f32;
+            let _phase = (i % 4) as f32;
             let y_offset = match i % 4 {
                 1 => -wave_amplitude,
                 3 => wave_amplitude,

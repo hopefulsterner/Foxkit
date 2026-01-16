@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use wgpu::*;
 
-use crate::{Color, Point};
 
 /// Glyph identifier
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

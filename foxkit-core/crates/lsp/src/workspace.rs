@@ -4,10 +4,7 @@
 
 use lsp_types::*;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use parking_lot::RwLock;
-use anyhow::Result;
 
 /// Workspace folder management
 pub struct WorkspaceManager {

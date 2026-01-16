@@ -1,7 +1,6 @@
 //! LSP server process management
 
-use std::process::{Child, Stdio};
-use std::collections::HashMap;
+use std::process::Stdio;
 use tokio::process::{Command, Child as TokioChild, ChildStdin, ChildStdout};
 use anyhow::Result;
 

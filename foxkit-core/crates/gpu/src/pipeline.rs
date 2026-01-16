@@ -12,11 +12,11 @@ use parking_lot::RwLock;
 use wgpu::*;
 
 use crate::{
-    Color, Point, Rect, Scene, Primitive, Renderer,
+    Color, Point, Renderer,
     FontSystem, FontKey, FontWeight, FontStyle, FontMetrics,
     EditorSceneBuilder, EditorRenderCommand, EditorLineStyle,
 };
-use crate::integrated_text::{IntegratedTextRenderer, PositionedGlyph, build_text_vertices, TextVertex};
+use crate::integrated_text::{IntegratedTextRenderer, build_text_vertices, TextVertex};
 
 /// Prepared frame data for rendering
 #[derive(Debug, Clone, Default)]

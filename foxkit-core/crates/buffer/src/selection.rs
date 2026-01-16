@@ -1,7 +1,6 @@
 //! Selection and cursor
 
 use smallvec::SmallVec;
-use rope::Point;
 
 /// A selection (anchor to head)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

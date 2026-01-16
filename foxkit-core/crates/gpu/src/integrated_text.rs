@@ -8,7 +8,7 @@ use wgpu::*;
 use parking_lot::RwLock;
 use bytemuck;
 
-use crate::{Color, Point, FontSystem, FontKey, RasterizedGlyph, FontMetrics};
+use crate::{Color, Point, FontSystem, FontKey, FontMetrics};
 
 /// Glyph identifier for caching
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

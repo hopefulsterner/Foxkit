@@ -18,7 +18,6 @@ pub mod integrated_text;
 pub mod pipeline;
 
 use std::sync::Arc;
-use parking_lot::RwLock;
 use anyhow::Result;
 use wgpu::*;
 
