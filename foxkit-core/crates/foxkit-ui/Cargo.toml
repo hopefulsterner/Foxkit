@@ -4,6 +4,10 @@ version.workspace = true
 edition.workspace = true
 description = "Foxkit UI components and widgets"
 
+[[bin]]
+name = "foxkit"
+path = "src/main.rs"
+
 [dependencies]
 foxkit-core = { path = "../foxkit-core" }
 foxkit-gpui = { path = "../foxkit-gpui" }
@@ -12,3 +16,6 @@ theme = { path = "../theme" }
 tokio.workspace = true
 parking_lot.workspace = true
 serde.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

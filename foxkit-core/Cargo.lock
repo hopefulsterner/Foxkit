@@ -2331,12 +2331,15 @@ dependencies = [
 name = "foxkit-ui"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "foxkit-core",
  "foxkit-gpui",
  "parking_lot",
  "serde",
  "theme",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
