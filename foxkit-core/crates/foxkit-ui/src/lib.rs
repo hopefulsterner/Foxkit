@@ -1,9 +1,44 @@
 //! Foxkit UI - High-level UI components and widgets.
 //!
 //! This crate provides reusable UI components built on top of foxkit-gpui.
+//!
+//! # Architecture
+//!
+//! The UI is built around a state/view separation:
+//! - **State**: Holds mutable data and business logic
+//! - **View**: Immutable render output consumed by the GPU renderer
+//!
+//! # Main Components
+//!
+//! - [`app::App`] - Main application shell with layout management
+//! - [`components::activity_bar`] - Left icon bar for view switching
+//! - [`components::sidebar`] - Side panel with Explorer, Search, Git, etc.
+//! - [`components::editor_area`] - Main editor with tabs and split views
+//! - [`components::bottom_panel`] - Terminal, Problems, Output, AI Chat
+//! - [`components::status_bar`] - Bottom status bar
+//! - [`theme::Theme`] - Unified theming system
 
 use serde::{Deserialize, Serialize};
 use foxkit_gpui::{Color, Corners, Edges, Size};
+
+// Main application
+pub mod app;
+pub mod components;
+pub mod theme;
+pub mod renderer;
+
+// Re-exports for convenience
+pub use app::{App, AppLayout, AppView};
+pub use theme::{Theme, ThemeKind, ThemeColors};
+pub use components::{
+    activity_bar::{ActivityBarState, ActivityId},
+    sidebar::{SidebarState, SidebarView},
+    editor_area::{EditorAreaState, EditorLayout, EditorGroup},
+    bottom_panel::{BottomPanelState, PanelContent},
+    status_bar::{StatusBarState, StatusBarMode},
+    tabs::{TabBar, Tab},
+    tree_view::{TreeView, TreeNode},
+};
 
 /// Button variant styles.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
